@@ -1,11 +1,14 @@
 package com.backinfile.cube.view;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.backinfile.cube.controller.GameManager;
 import com.backinfile.cube.model.MapData;
 import com.backinfile.cube.model.cubes.Cube;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -13,7 +16,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 public class WorldStage extends Stage {
 
 	private Group mainView;
-	private List<CubeView> cubeViews = new ArrayList<>();
+	private Map<String, Group> viewGroups = new HashMap<>();
 
 	public WorldStage(Viewport viewport) {
 		super(viewport);
@@ -26,16 +29,43 @@ public class WorldStage extends Stage {
 		mainView.setSize(this.getWidth(), this.getHeight());
 		addActor(mainView);
 
-		MapData mapData = GameManager.instance.getCurMap();
-		for (Cube cube : mapData.cubeMap.getUnitList()) {
-			CubeView cubeView = new CubeView(cube);
-			cubeViews.add(cubeView);
-			mainView.addActor(cubeView);
+		for (MapData mapData : GameManager.instance.worldData.getDatas()) {
+			Group group = getCubeGroup(mapData.coor);
+			mainView.addActor(group);
+			for (Cube cube : mapData.cubeMap.getUnitList()) {
+				group.addActor(new CubeView(cube));
+			}
 		}
 
 	}
 
 	public List<CubeView> getCubeViews() {
+		List<CubeView> cubeViews = new ArrayList<>();
+		for (Group group : viewGroups.values()) {
+			for (Actor actor : group.getChildren()) {
+				if (actor instanceof CubeView) {
+					cubeViews.add((CubeView) actor);
+				}
+			}
+		}
+		return cubeViews;
+	}
+
+	public Group getCubeGroup(String coor) {
+		return viewGroups.computeIfAbsent(coor, key -> new Group());
+	}
+
+	public List<CubeView> getCubeViews(String coor) {
+		List<CubeView> cubeViews = new ArrayList<>();
+		Group group = viewGroups.get(coor);
+		if (group == null) {
+			return cubeViews;
+		}
+		for (Actor actor : group.getChildren()) {
+			if (actor instanceof CubeView) {
+				cubeViews.add((CubeView) actor);
+			}
+		}
 		return cubeViews;
 	}
 

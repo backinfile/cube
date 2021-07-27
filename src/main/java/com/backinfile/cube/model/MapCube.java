@@ -19,7 +19,7 @@ public class MapCube extends Cube {
 	}
 
 	@Override
-	public boolean canEnter() {
+	public boolean isMapCube() {
 		return true;
 	}
 }

@@ -3,6 +3,7 @@ package com.backinfile.cube.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.backinfile.cube.Log;
 import com.backinfile.cube.model.cubes.Cube;
 import com.backinfile.cube.model.cubes.Human;
 import com.backinfile.cube.model.cubes.Rock;
@@ -30,6 +31,7 @@ public class WorldData {
 				return data;
 			}
 		}
+		Log.game.error("search coor:{} not exist!", coor);
 		return null;
 	}
 

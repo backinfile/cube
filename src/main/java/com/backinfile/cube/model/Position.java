@@ -45,6 +45,9 @@ public class Position {
 	public Position getTranslated(Vector vector) {
 		return new Position(x + vector.x, y + vector.y, worldCoor);
 	}
+	public Position getTranslated(int x, int y) {
+		return new Position(x + this.x, y + this.y, worldCoor);
+	}
 
 	public Position copy() {
 		return new Position(x, y, worldCoor);
@@ -63,7 +66,7 @@ public class Position {
 			Position obj = (Position) other;
 			return this.x == obj.x && this.y == obj.y && this.worldCoor.equals(obj.worldCoor);
 		}
-		return super.equals(other);
+		return false;
 	}
 
 	@Override

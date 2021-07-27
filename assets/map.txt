@@ -3,17 +3,24 @@ size=9*9
 map=
 WWWWWWWWW
 W       W
-W  R    W
+W  R   WW
 W       W
-W   M   W
+WWW     W
 W    R  W
-W a     W
-W     a W
+W  a    W
+W       W
 WWWWWWWWW
 
 index=aa
 size=3*3
 map=
-W W
-W W
+WWW
+M a
+WWW
+
+index=aaa
+size=3*3
+map=
+WWW
+W  
 WWW

@@ -10,10 +10,13 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 public class Res {
 	public static final int CUBE_SIZE = 50;
-	public static final int CUBE_BORDER_WIDTH = 2;
+	public static final int CUBE_BORDER_WIDTH = 3;
+	public static final int CUBE_BORDER_WIDTH_THIN = 1;
 
 	public static TextureRegion CUBE_BORDER_BLACK;
 	public static TextureRegion CUBE_BORDER_WHITE;
+	public static TextureRegion CUBE_BORDER_DARK;
+	public static TextureRegion[] CUBE_BORDER_ASIDE;
 
 	public static TextureRegion CUBE_FLOWER;
 	public static TextureRegion CUBE_WALL;
@@ -26,10 +29,12 @@ public class Res {
 	public static void init() {
 		CUBE_BORDER_BLACK = newBorderImage(Color.BLACK);
 		CUBE_BORDER_WHITE = newBorderImage(Color.WHITE);
+		CUBE_BORDER_DARK = newBorderImage(Color.DARK_GRAY);
+		CUBE_BORDER_ASIDE = newBorderAsideImage(Color.BLACK);
 
 		CUBE_FLOWER = newColorTexture(CUBE_SIZE, CUBE_SIZE, Color.LIGHT_GRAY);
 		CUBE_WALL = newColorTexture(CUBE_SIZE, CUBE_SIZE, Color.DARK_GRAY);
-		CUBE_ROCK = newColorTexture(CUBE_SIZE, CUBE_SIZE, Color.LIGHT_GRAY);
+		CUBE_ROCK = newColorTexture(CUBE_SIZE, CUBE_SIZE, new Color(0.67f, 0.67f, 0.67f, 1));
 		CUBE_HUMAN = newHumanImage();
 
 		Cursor = newCursorPixmap();
@@ -38,10 +43,11 @@ public class Res {
 	private static TextureRegion newHumanImage() {
 		Pixmap pixmap = new Pixmap(CUBE_SIZE, CUBE_SIZE, Format.RGBA8888);
 		pixmap.setColor(new Color(0.8f, 0.1f, 0.1f, 1f));
-		pixmap.fill();
+		pixmap.fillRectangle(CUBE_BORDER_WIDTH_THIN, CUBE_BORDER_WIDTH_THIN, CUBE_SIZE - CUBE_BORDER_WIDTH_THIN * 2,
+				CUBE_SIZE - CUBE_BORDER_WIDTH_THIN * 2);
 		pixmap.setColor(Color.BLACK);
-		pixmap.fillCircle(CUBE_SIZE / 4, CUBE_SIZE * 3 / 7, CUBE_SIZE / 10);
-		pixmap.fillCircle(CUBE_SIZE * 3 / 4, CUBE_SIZE * 3 / 7, CUBE_SIZE / 10);
+		pixmap.fillCircle(CUBE_SIZE * 3 / 10, CUBE_SIZE * 3 / 7, CUBE_SIZE / 12);
+		pixmap.fillCircle(CUBE_SIZE * 7 / 10, CUBE_SIZE * 3 / 7, CUBE_SIZE / 12);
 		TextureRegion texture = new TextureRegion(new Texture(pixmap));
 		pixmap.dispose();
 		return texture;
@@ -50,10 +56,34 @@ public class Res {
 	private static TextureRegion newBorderImage(Color color) {
 		Pixmap pixmap = new Pixmap(CUBE_SIZE, CUBE_SIZE, Format.RGBA8888);
 		pixmap.setColor(color);
-		DrawUtils.drawBorder(pixmap, CUBE_BORDER_WIDTH);
+		DrawUtils.drawBorder(pixmap, 1);
 		TextureRegion texture = new TextureRegion(new Texture(pixmap));
 		pixmap.dispose();
 		return texture;
+	}
+
+	private static TextureRegion[] newBorderAsideImage(Color color) {
+		Pixmap pixmap = new Pixmap(CUBE_SIZE, CUBE_SIZE, Format.RGBA8888);
+		pixmap.setColor(color);
+		pixmap.fillRectangle(0, 0, CUBE_SIZE, CUBE_BORDER_WIDTH);
+		TextureRegion texture0 = new TextureRegion(new Texture(pixmap));
+		pixmap.dispose();
+		pixmap = new Pixmap(CUBE_SIZE, CUBE_SIZE, Format.RGBA8888);
+		pixmap.setColor(color);
+		pixmap.fillRectangle(0, CUBE_SIZE - CUBE_BORDER_WIDTH, CUBE_SIZE, CUBE_SIZE);
+		TextureRegion texture1 = new TextureRegion(new Texture(pixmap));
+		pixmap.dispose();
+		pixmap = new Pixmap(CUBE_SIZE, CUBE_SIZE, Format.RGBA8888);
+		pixmap.setColor(color);
+		pixmap.fillRectangle(0, 0, CUBE_BORDER_WIDTH, CUBE_SIZE);
+		TextureRegion texture2 = new TextureRegion(new Texture(pixmap));
+		pixmap.dispose();
+		pixmap = new Pixmap(CUBE_SIZE, CUBE_SIZE, Format.RGBA8888);
+		pixmap.setColor(color);
+		pixmap.fillRectangle(CUBE_SIZE - CUBE_BORDER_WIDTH, 0, CUBE_SIZE, CUBE_SIZE);
+		TextureRegion texture3 = new TextureRegion(new Texture(pixmap));
+		pixmap.dispose();
+		return new TextureRegion[] { texture0, texture1, texture2, texture3 };
 	}
 
 	private static Pixmap newCursorPixmap() {
@@ -61,10 +91,6 @@ public class Res {
 		pixmap.setColor(Color.WHITE);
 		pixmap.fill();
 		return pixmap;
-	}
-
-	private static TextureRegion newColorTexture(Color color) {
-		return newColorTexture(8, 8, color);
 	}
 
 	private static TextureRegion newColorTexture(int width, int height, Color color) {

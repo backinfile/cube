@@ -1,35 +1,19 @@
-index=A
+index=a
 size=9*9
 map=
-ww wwbwww
-ww      w
-ww   b  w
-w    b  w
-ww    b  
-ww   b  w
-ww m0bbww
-ww     ww
-wwwww www
-floor=
-ww wwbwww
-ww      w
-ww   b  w
-w    b  w
-ww    b  
-ww   b  w
-ww m0bbww
-ww     ww
-wwwww www
+WWWWWWWWW
+W       W
+W  R    W
+W       W
+W   M   W
+W    R  W
+W a     W
+W     a W
+WWWWWWWWW
 
-index=AA
-size=9*9
+index=aa
+size=3*3
 map=
-ww wwbwww
-ww      w
-ww   b  w
-w    b  w
-ww    b  
-ww   b  w
-ww m bbww
-ww     ww
-wwwww www
+W W
+W W
+WWW

@@ -1,4 +1,6 @@
-package com.backinfile.cube.core;
+package com.backinfile.cube.model;
+
+import com.backinfile.cube.model.cubes.Cube;
 
 public class MapCube extends Cube {
 	private char targetMapChar;

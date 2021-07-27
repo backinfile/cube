@@ -1,4 +1,4 @@
-package com.backinfile.cube.core;
+package com.backinfile.cube.model;
 
 import java.util.Objects;
 

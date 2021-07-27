@@ -1,7 +1,9 @@
-package com.backinfile.cube.core;
+package com.backinfile.cube.model;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import com.backinfile.cube.model.cubes.Cube;
 
 public class History {
 	private static class Movement {

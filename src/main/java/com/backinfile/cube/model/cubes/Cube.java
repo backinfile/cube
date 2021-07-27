@@ -1,4 +1,6 @@
-package com.backinfile.cube.core;
+package com.backinfile.cube.model.cubes;
+
+import com.backinfile.cube.model.WorldUnit;
 
 public abstract class Cube extends WorldUnit {
 	public abstract boolean isPushable();
@@ -6,10 +8,4 @@ public abstract class Cube extends WorldUnit {
 	public boolean canEnter() {
 		return false;
 	}
-
-	@Override
-	public String toString() {
-		return position.toString();
-	}
-
 }

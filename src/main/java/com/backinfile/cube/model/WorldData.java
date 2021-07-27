@@ -1,7 +1,12 @@
-package com.backinfile.cube.core;
+package com.backinfile.cube.model;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import com.backinfile.cube.model.cubes.Cube;
+import com.backinfile.cube.model.cubes.Human;
+import com.backinfile.cube.model.cubes.Rock;
+import com.backinfile.cube.model.cubes.Wall;
 
 public class WorldData {
 	private List<MapData> datas = new ArrayList<>();
@@ -104,6 +109,7 @@ public class WorldData {
 						if (cube != null) {
 							cube.originPosition.x = w;
 							cube.originPosition.y = curMapData.height - h - 1;
+							cube.originPosition.worldCoor = curMapData.coor;
 							cube.resetPosition();
 							curMapData.cubeMap.add(cube);
 						}
@@ -111,6 +117,9 @@ public class WorldData {
 				}
 				index += curMapData.height + 1;
 			}
+		}
+		if (curMapData != null) {
+			world.datas.add(curMapData);
 		}
 		return world;
 	}

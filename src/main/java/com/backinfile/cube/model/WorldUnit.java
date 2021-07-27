@@ -1,4 +1,4 @@
-package com.backinfile.cube.core;
+package com.backinfile.cube.model;
 
 public class WorldUnit {
 	public Position position = new Position(); // 当前位置
@@ -14,6 +14,6 @@ public class WorldUnit {
 
 	@Override
 	public String toString() {
-		return "[" + this.getClass().getSimpleName() + position.toString() + "]";
+		return getClass().getSimpleName() + position.toString();
 	}
 }

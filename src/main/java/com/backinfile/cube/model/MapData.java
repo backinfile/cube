@@ -1,7 +1,11 @@
-package com.backinfile.cube.core;
+package com.backinfile.cube.model;
+
+import com.backinfile.cube.model.cubes.Cube;
+import com.backinfile.cube.model.cubes.Floor;
+import com.backinfile.cube.model.cubes.Human;
 
 public class MapData {
-	public String coor; // 所处位置
+	public String coor = ""; // 所处位置
 	public int width;
 	public int height;
 	public MMap<Cube> cubeMap; // 方块

@@ -1,4 +1,4 @@
-package com.backinfile.cube.core;
+package com.backinfile.cube.model;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.StringJoiner;
 
 import com.backinfile.cube.support.Action3;
+import com.backinfile.cube.support.SysException;
 
 public class MMap<T extends WorldUnit> {
 	private int width;

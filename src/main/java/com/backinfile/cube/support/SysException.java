@@ -1,4 +1,4 @@
-package com.backinfile.cube.core;
+package com.backinfile.cube.support;
 
 public class SysException extends RuntimeException {
 	private static final long serialVersionUID = 1L;

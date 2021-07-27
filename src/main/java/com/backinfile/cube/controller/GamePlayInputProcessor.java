@@ -1,34 +1,40 @@
-package com.backinfile.cube.core;
+package com.backinfile.cube.controller;
 
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
 
-public class LoopInputProcessor implements InputProcessor {
+public class GamePlayInputProcessor implements InputProcessor {
+
+	private GameManager gameManager;
+
+	public GamePlayInputProcessor(GameManager gameManager) {
+		this.gameManager = gameManager;
+	}
 
 	@Override
 	public boolean keyDown(int keycode) {
 		switch (keycode) {
 		case Keys.UP:
 		case Keys.W:
-			GameManager.instance.moveHuman(0);
+			gameManager.moveHuman(0);
 			break;
 		case Keys.DOWN:
 		case Keys.S:
-			GameManager.instance.moveHuman(1);
+			gameManager.moveHuman(1);
 			break;
 		case Keys.LEFT:
 		case Keys.A:
-			GameManager.instance.moveHuman(2);
+			gameManager.moveHuman(2);
 			break;
 		case Keys.RIGHT:
 		case Keys.D:
-			GameManager.instance.moveHuman(3);
+			gameManager.moveHuman(3);
 			break;
 		case Keys.R:
-			GameManager.instance.resetGame();
+			gameManager.resetGame();
 			break;
 		case Keys.Z:
-			GameManager.instance.undo();
+			gameManager.undo();
 			break;
 		default:
 			break;

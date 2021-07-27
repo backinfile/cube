@@ -1,11 +1,14 @@
 package com.backinfile.cube.core;
 
 public class MapCube extends Cube {
-	private char targetMap;
+	private char targetMapChar;
 
 	public MapCube(char targetMap) {
-		super();
-		this.targetMap = targetMap;
+		this.targetMapChar = targetMap;
+	}
+
+	public char getTargetMapChar() {
+		return targetMapChar;
 	}
 
 	@Override

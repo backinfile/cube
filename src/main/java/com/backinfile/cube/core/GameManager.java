@@ -1,8 +1,6 @@
 package com.backinfile.cube.core;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
 
 import com.backinfile.cube.Res;
 import com.backinfile.cube.actor.WorldView;
@@ -45,19 +43,6 @@ public class GameManager {
 	public Vector getWorldSize() {
 		MapData curMapData = worldData.getMapData(curCoor);
 		return new Vector(Res.CUBE_SIZE * curMapData.width, Res.CUBE_SIZE * curMapData.height);
-	}
-
-	private List<Integer> getSplitByTransPosList(List<Pos> posList) {
-		List<Integer> indexList = new ArrayList<>();
-		for (int i = posList.size() - 1; i >= 0; i--) {
-			if (isPosTrans(posList.get(i))) {
-				indexList.add(i);
-			}
-		}
-		return indexList;
-	}
-
-	private void _moveCubePosList(ArrayList<Position> posList) {
 	}
 
 }

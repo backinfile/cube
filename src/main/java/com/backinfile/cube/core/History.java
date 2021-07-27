@@ -1,4 +1,4 @@
-package com.backinfile.loop.core;
+package com.backinfile.cube.core;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,7 +6,7 @@ import java.util.List;
 public class History {
 	private static class Movement {
 		public Cube cube;
-		public Pos oriPos;
+		public Position lastPosition;
 	}
 
 	private List<Movement> movements = new ArrayList<>();
@@ -19,7 +19,7 @@ public class History {
 		for (Cube cube : cubes) {
 			Movement movement = new Movement();
 			movement.cube = cube;
-			movement.oriPos = cube.pos.copy();
+			movement.lastPosition = cube.position.copy();
 			history.movements.add(movement);
 		}
 		return history;
@@ -27,7 +27,7 @@ public class History {
 
 	public void playback() {
 		for (Movement movement : movements) {
-			movement.cube.setPosition(movement.oriPos);
+			movement.cube.position.setPosition(movement.lastPosition);
 		}
 	}
 }

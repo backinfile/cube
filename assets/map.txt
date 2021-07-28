@@ -66,15 +66,15 @@ WWWWWWWWW
 
 index=ab
 size=3*3
-text=T cross 路口
+text=十字路口
 map=
 W W
-  W
+  
 W W
 
 index=ac
 size=3*3
-text=ac
+text=向上
 map=
 WWW
 W W
@@ -83,7 +83,7 @@ W W
 
 index=ad
 size=3*3
-text=ad
+text=向下
 map=
 W W
 W W
@@ -91,7 +91,7 @@ WWW
 
 index=ae
 size=3*3
-text=ae
+text=前进
 map=
 WWW
   W

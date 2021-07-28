@@ -8,6 +8,7 @@ import com.backinfile.cube.model.cubes.Wall;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
+import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 
 public class CubeView extends Group {
@@ -53,7 +54,10 @@ public class CubeView extends Group {
 
 	public void setHumanEyeOffset(float x, float y) {
 		if (humanEyeImage != null) {
-			humanEyeImage.setPosition(x, y);
+			MoveToAction moveToAction = new MoveToAction();
+			moveToAction.setDuration(0.06f);
+			moveToAction.setPosition(x, y);
+			humanEyeImage.addAction(moveToAction);
 		}
 	}
 

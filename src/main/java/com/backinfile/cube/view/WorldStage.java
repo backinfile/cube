@@ -5,17 +5,29 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.backinfile.cube.Res;
 import com.backinfile.cube.controller.GameManager;
 import com.backinfile.cube.model.MapData;
 import com.backinfile.cube.model.cubes.Cube;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Button;
+import com.badlogic.gdx.scenes.scene2d.ui.Button.ButtonStyle;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
+import com.badlogic.gdx.scenes.scene2d.ui.TextArea;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldStyle;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 public class WorldStage extends Stage {
 
 	private Group mainView;
+	private TextField tipText;
 	private Map<String, Group> viewGroups = new HashMap<>();
 
 	public WorldStage(Viewport viewport) {
@@ -25,10 +37,10 @@ public class WorldStage extends Stage {
 	}
 
 	private void init() {
+		// 初始化方块
 		mainView = new Group();
 		mainView.setSize(this.getWidth(), this.getHeight());
 		addActor(mainView);
-
 		for (MapData mapData : GameManager.instance.worldData.getDatas()) {
 			Group group = getCubeGroup(mapData.coor);
 			mainView.addActor(group);
@@ -37,6 +49,15 @@ public class WorldStage extends Stage {
 			}
 		}
 
+		// 初始化其他
+		TextFieldStyle style = new TextFieldStyle();
+		style.font = Res.DefaultFont;
+		style.fontColor = Color.LIGHT_GRAY;
+		tipText = new TextField("123asd哈哈", style);
+		tipText.setSize(getWidth(), getHeight() / 4);
+		tipText.setAlignment(Align.center);
+		tipText.setPosition(getWidth() / 2, getHeight() / 4, Align.center);
+		addActor(tipText);
 	}
 
 	public List<CubeView> getCubeViews() {
@@ -90,6 +111,13 @@ public class WorldStage extends Stage {
 
 	public Group getMainView() {
 		return mainView;
+	}
+
+	public void setTipText(boolean visible, String content) {
+		tipText.setVisible(visible);
+		if (visible) {
+			tipText.setText(content);
+		}
 	}
 
 	@Override

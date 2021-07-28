@@ -51,6 +51,12 @@ public class CubeView extends Group {
 		borderAsideImages[index].setVisible(!open);
 	}
 
+	public void setHumanEyeOffset(float x, float y) {
+		if (humanEyeImage != null) {
+			humanEyeImage.setPosition(x, y);
+		}
+	}
+
 	@Override
 	public void setSize(float width, float height) {
 		super.setSize(width, height);

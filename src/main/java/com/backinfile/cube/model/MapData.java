@@ -10,6 +10,8 @@ public class MapData {
 	public int height;
 	public MMap<Cube> cubeMap; // 方块
 	public MMap<Floor> floorMap; // 地板标记
+	public String view = "";
+	public String tipText = "";
 
 	public void initMap(int width, int height) {
 		this.width = width;

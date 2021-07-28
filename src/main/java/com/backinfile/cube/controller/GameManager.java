@@ -30,17 +30,18 @@ public class GameManager {
 	public String curWorldCoor;
 	private Human human;
 	private LinkedList<History> histories = new LinkedList<History>();
+	private Vector lastHumanMove = new Vector();
 
 	private static final int[] dx = new int[] { 0, 0, -1, 1 };
 	private static final int[] dy = new int[] { 1, -1, 0, 0 };
 
 	public void init() {
 		// 解析配置数据
-		worldData = WorldData.parse(Res.getDefaultWorldConf());
+		worldData = WorldData.parse(Res.DefaultWorldConfString);
 
 		// 初始化human位置
 		MapData firstMapData = worldData.getHumanMapData();
-		curWorldCoor = firstMapData.coor;
+		curWorldCoor = "";
 		for (Cube cube : firstMapData.cubeMap.getUnitList()) {
 			if (cube instanceof Human) {
 				human = (Human) cube;
@@ -72,16 +73,29 @@ public class GameManager {
 	public void updateGameView(History history) {
 		// 调整方块到合适的group
 		for (Movement movement : history.getMovements()) {
-			CubeView cubeView = worldStage.removeCubeView(movement.position.worldCoor, movement.cube);
-			worldStage.addCubeView(movement.cube.position.worldCoor, cubeView);
+			if (!movement.position.worldCoor.equals(movement.cube.position.worldCoor)) {
+				CubeView cubeView = worldStage.removeCubeView(movement.position.worldCoor, movement.cube);
+				worldStage.addCubeView(movement.cube.position.worldCoor, cubeView);
+			}
 		}
 		updateGameView();
 	}
 
+	private String lastWorldCoor;
+
 	public void updateGameView() {
 		// 设置当前所在地图
-		MapData curMap = worldData.getHumanMapData();
-		curWorldCoor = curMap.coor;
+		lastWorldCoor = curWorldCoor;
+		MapData humanMapData = worldData.getHumanMapData();
+		if (humanMapData.view.length() > 0) {
+			curWorldCoor = humanMapData.view;
+		} else {
+			curWorldCoor = humanMapData.coor;
+		}
+		MapData curMap = worldData.getMapData(curWorldCoor);
+		if (!lastWorldCoor.equals(curWorldCoor)) {
+			worldStage.setTipText(curMap.tipText.length() > 0, curMap.tipText);
+		}
 
 		// 设置主视图居中
 		Group mainView = worldStage.getMainView();
@@ -103,7 +117,7 @@ public class GameManager {
 		if (coor.length() > curWorldCoor.length() + 2) {
 			return;
 		}
-		Log.game.info("show coor:{} x:{} y:{} width:{} height:{}", coor, x, y, width, height);
+//		Log.game.info("show coor:{} x:{} y:{} width:{} height:{}", coor, x, y, width, height);
 		MapData mapData = worldData.getMapData(coor);
 		Group group = worldStage.getCubeGroup(coor);
 		group.setSize(width, height);
@@ -123,6 +137,8 @@ public class GameManager {
 				for (int i = 0; i < 4; i++) {
 					cubeView.setAsideBorder(i, adjWallDirections.contains(i));
 				}
+			} else if (cube instanceof Human) {
+				cubeView.setHumanEyeOffset(lastHumanMove.x * cubeWidth / 10, lastHumanMove.y * cubeHeight / 10);
 			}
 		}
 
@@ -148,12 +164,13 @@ public class GameManager {
 	}
 
 	public void moveHuman(int dura) {
-		Vector d = new Vector(dx[dura], dy[dura]);
+		lastHumanMove = new Vector(dx[dura], dy[dura]);
 		ArrayList<Position> passPosList = new ArrayList<>();
 		passPosList.add(human.position);
-		if (testCubeMove(human.position, d, passPosList)) {
+		if (testCubeMove(human.position, lastHumanMove, passPosList)) {
 			doMovePosition(passPosList);
 		}
+		Log.game.info("move {} human:{}", lastHumanMove, human.position);
 	}
 
 	private void doMovePosition(ArrayList<Position> passPosList) {
@@ -195,18 +212,12 @@ public class GameManager {
 		Position nextPos = startPosition;
 		for (int loopCnt = 0; loopCnt < 10000; loopCnt++) {
 			nextPos = getNextPos(curPos, d);
-			// 超出边界或者自我循环了， 不能移动
-			if (nextPos == null || passPosList.contains(nextPos)) {
+			// 自我循环了，不能移动
+			if (nextPos != null && passPosList.contains(nextPos)) {
 				return false;
 			}
-			// 碰到空地了，可以直接移动
-			if (isPosEmpty(nextPos)) {
-				passPosList.add(nextPos);
-				return true;
-			}
-			Cube cube = getCube(nextPos);
-			// 遇见墙了
-			if (!cube.isPushable()) {
+			// 超出边界或者遇见墙了
+			if (nextPos == null || isPosStop(nextPos)) {
 				List<Integer> mapCubePosIndexs = getSplitByMapCubePosList(passPosList);
 				// 没有进入方块的可能了，不能移动
 				if (mapCubePosIndexs.isEmpty()) {
@@ -236,6 +247,11 @@ public class GameManager {
 				// 尝试用方块吞噬
 				return false;
 			}
+			// 碰到空地了，可以直接移动
+			if (isPosEmpty(nextPos)) {
+				passPosList.add(nextPos);
+				return true;
+			}
 			passPosList.add(nextPos);
 			curPos = nextPos;
 		}
@@ -244,7 +260,8 @@ public class GameManager {
 
 	private List<Integer> getSplitByMapCubePosList(List<Position> posList) {
 		List<Integer> indexList = new ArrayList<>();
-		for (int i = posList.size() - 1; i >= 0; i--) {
+//		for (int i = posList.size() - 1; i >= 0; i--) {
+		for (int i = 0; i < posList.size(); i++) {
 			Cube cube = getCube(posList.get(i));
 			if (cube != null && cube.isMapCube()) {
 				indexList.add(i);
@@ -327,6 +344,12 @@ public class GameManager {
 	private boolean isPosEmpty(Position position) {
 		MapData mapData = worldData.getMapData(position.worldCoor);
 		return mapData.cubeMap.get(position.x, position.y) == null;
+	}
+
+	private boolean isPosStop(Position position) {
+		MapData mapData = worldData.getMapData(position.worldCoor);
+		Cube cube = mapData.cubeMap.get(position.x, position.y);
+		return cube != null && !cube.isPushable();
 	}
 
 	private boolean isPosPushable(Position position) {

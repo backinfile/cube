@@ -59,6 +59,8 @@ public class WorldData {
 	private static final String R_SIZE = "size=";
 	private static final String R_MAP = "map=";
 	private static final String R_FLOOR = "floor=";
+	private static final String R_TEXT = "text=";
+	private static final String R_VIEW = "view=";
 
 	private static final char C_HUMAN = 'M';
 	private static final char C_WALL = 'W';
@@ -84,6 +86,10 @@ public class WorldData {
 					int height = Integer.valueOf(sizeConf[1]);
 					curMapData.initMap(width, height);
 				}
+			} else if (curLine.startsWith(R_TEXT)) {
+				curMapData.tipText = curLine.substring(R_TEXT.length()).trim();
+			} else if (curLine.startsWith(R_VIEW)) {
+				curMapData.view = curLine.substring(R_VIEW.length()).trim();
 			} else if (curLine.startsWith(R_MAP)) {
 				for (int h = 0; h < curMapData.height; h++) {
 					String line = confs[index + h + 1];
@@ -117,7 +123,7 @@ public class WorldData {
 						}
 					}
 				}
-				index += curMapData.height + 1;
+				index += curMapData.height;
 			}
 		}
 		if (curMapData != null) {

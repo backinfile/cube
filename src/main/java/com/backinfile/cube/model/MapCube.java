@@ -3,14 +3,14 @@ package com.backinfile.cube.model;
 import com.backinfile.cube.model.cubes.Cube;
 
 public class MapCube extends Cube {
-	private char targetMapChar;
+	private String targetCoor;
 
-	public MapCube(char targetMap) {
-		this.targetMapChar = targetMap;
+	public MapCube(String targetCoor) {
+		this.targetCoor = targetCoor;
 	}
 
-	public char getTargetMapChar() {
-		return targetMapChar;
+	public String getTargetCoor() {
+		return targetCoor;
 	}
 
 	@Override

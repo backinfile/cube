@@ -7,6 +7,7 @@ import java.util.List;
 import com.backinfile.cube.Log;
 import com.backinfile.cube.Res;
 import com.backinfile.cube.model.History;
+import com.backinfile.cube.model.History.Movement;
 import com.backinfile.cube.model.MapCube;
 import com.backinfile.cube.model.MapData;
 import com.backinfile.cube.model.Position;
@@ -55,7 +56,7 @@ public class GameManager {
 	public void undo() {
 		if (!histories.isEmpty()) {
 			History history = histories.pollLast();
-			history.playback();
+//			history.playback();
 		}
 	}
 
@@ -68,14 +69,27 @@ public class GameManager {
 		return new Vector(Res.CUBE_SIZE * curMapData.width, Res.CUBE_SIZE * curMapData.height);
 	}
 
+	public void updateGameView(History history) {
+		// 调整方块到合适的group
+		for (Movement movement : history.getMovements()) {
+			CubeView cubeView = worldStage.removeCubeView(movement.position.worldCoor, movement.cube);
+			worldStage.addCubeView(movement.cube.position.worldCoor, cubeView);
+		}
+		updateGameView();
+	}
+
 	public void updateGameView() {
-		MapData curMap = getCurMap();
+		// 设置当前所在地图
+		MapData curMap = worldData.getHumanMapData();
+		curWorldCoor = curMap.coor;
+
 		// 设置主视图居中
 		Group mainView = worldStage.getMainView();
 		int width = Res.CUBE_SIZE * curMap.width;
 		int height = Res.CUBE_SIZE * curMap.height;
 		mainView.setSize(width, height);
 		mainView.setPosition((worldStage.getWidth() - width) / 2, (worldStage.getHeight() - height) / 2);
+
 		// 先隐藏所有方块
 		for (MapData mapData : worldData.getDatas()) {
 			Group group = worldStage.getCubeGroup(mapData.coor);
@@ -89,7 +103,7 @@ public class GameManager {
 		if (coor.length() > curWorldCoor.length() + 2) {
 			return;
 		}
-//		Log.game.info("show coor:{} x:{} y:{} width:{} height:{}", coor, x, y, width, height);
+		Log.game.info("show coor:{} x:{} y:{} width:{} height:{}", coor, x, y, width, height);
 		MapData mapData = worldData.getMapData(coor);
 		Group group = worldStage.getCubeGroup(coor);
 		group.setSize(width, height);
@@ -102,7 +116,7 @@ public class GameManager {
 			cubeView.setPosition(cube.position.x * cubeWidth, cube.position.y * cubeHeight);
 			cubeView.setSize(cubeWidth, cubeHeight);
 			if (cube instanceof MapCube) {
-				updateCubeGroupView(coor + ((MapCube) cube).getTargetMapChar(), x + cube.position.x * cubeWidth,
+				updateCubeGroupView(((MapCube) cube).getTargetCoor(), x + cube.position.x * cubeWidth,
 						y + cube.position.y * cubeHeight, cubeWidth, cubeHeight);
 			} else if (cube instanceof Wall) {
 				List<Integer> adjWallDirections = getAdjWallDirections(cube.position);
@@ -140,13 +154,34 @@ public class GameManager {
 		if (testCubeMove(human.position, d, passPosList)) {
 			doMovePosition(passPosList);
 		}
-		updateGameView();
 	}
 
 	private void doMovePosition(ArrayList<Position> passPosList) {
+		List<Cube> movedCubes = new ArrayList<>();
 		for (int i = 0; i < passPosList.size() - 1; i++) {
-			passPosList.get(i).setPosition(passPosList.get(i + 1));
+			movedCubes.add(getCube(passPosList.get(i)));
 		}
+
+		// 先记录下移动之前的情况
+		History history = History.getHistory(movedCubes);
+		histories.addLast(history);
+
+		// 进行移动
+		for (int i = 0; i < passPosList.size() - 1; i++) {
+			Position position = passPosList.get(i);
+			Position newPosition = passPosList.get(i + 1);
+			if (!position.worldCoor.equals(newPosition.worldCoor)) {
+				Cube cube = movedCubes.get(i);
+				worldData.getMapData(position.worldCoor).cubeMap.remove(cube);
+				position.setPosition(newPosition);
+				worldData.getMapData(newPosition.worldCoor).cubeMap.add(cube);
+			} else {
+				position.setPosition(newPosition);
+			}
+		}
+
+		// 刷新界面
+		updateGameView(history);
 	}
 
 	private boolean testCubeMove(Position startPosition, Vector d) {
@@ -159,7 +194,7 @@ public class GameManager {
 		Position curPos = startPosition;
 		Position nextPos = startPosition;
 		for (int loopCnt = 0; loopCnt < 10000; loopCnt++) {
-			nextPos = getNextPos(curPos, d, false);
+			nextPos = getNextPos(curPos, d);
 			// 超出边界或者自我循环了， 不能移动
 			if (nextPos == null || passPosList.contains(nextPos)) {
 				return false;
@@ -182,11 +217,19 @@ public class GameManager {
 					Position startPosition2 = passPosList.get(index);
 					ArrayList<Position> newPassPosList = Utils.subList(passPosList, 0, index);
 					MapCube mapCube = (MapCube) getCube(startPosition2);
-					Position edgePos = getEdgePos(nextPos.worldCoor + mapCube.getTargetMapChar(), d);
-					if (edgePos != null) { // 
-						if (isPosEmpty(edgePos)) {
-							// TODO
+					Position edgePos = getEdgePos(mapCube.getTargetCoor(), d);
+					if (edgePos != null) {
+						newPassPosList.add(edgePos);
+						if (isPosEmpty(edgePos)) { // 方块入口为空，直接移动过去
+							passPosList.clear();
+							passPosList.addAll(newPassPosList);
 							return true;
+						} else {
+							if (testCubeMove(edgePos, d, newPassPosList)) {
+								passPosList.clear();
+								passPosList.addAll(newPassPosList);
+								return true;
+							}
 						}
 					}
 				}
@@ -218,21 +261,26 @@ public class GameManager {
 	 * @param forceEnter    是否强制进入小方块
 	 * @return
 	 */
-	private Position getNextPos(Position startPosition, Vector d, boolean forceEnter) {
+	private Position getNextPos(Position startPosition, Vector d) {
 		Position translated = startPosition.getTranslated(d);
 		MapData mapData = worldData.getMapData(translated.worldCoor);
 		if (!mapData.cubeMap.inMap(translated.x, translated.y)) {
-			// 咪表在外层地图，尝试出去
+			// 可能在外层地图，尝试出去
+			int length = startPosition.worldCoor.length();
+			if (length > 1) {
+				for (MapData outMapData : worldData.getDatas()) {
+					for (Cube cube : outMapData.cubeMap.getUnitList()) {
+						if (cube.isMapCube() && ((MapCube) cube).getTargetCoor().equals(startPosition.worldCoor)) {
+							return getNextPos(cube.position, d);
+						}
+					}
+				}
+			}
 			return null;
 		}
 		Cube cube = mapData.cubeMap.get(translated.x, translated.y);
 		if (cube == null) { // 空白格子
 			return translated;
-		}
-		if (forceEnter && cube.isMapCube()) {
-			MapCube mapCube = (MapCube) cube;
-			Position edgePos = getEdgePos(startPosition.worldCoor + mapCube.getTargetMapChar(), d);
-			return edgePos;
 		}
 		return cube.position;
 	}

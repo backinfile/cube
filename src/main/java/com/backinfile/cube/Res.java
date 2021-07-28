@@ -23,6 +23,7 @@ public class Res {
 	public static TextureRegion CUBE_ROCK;
 	public static TextureRegion CUBE_TARGET;
 	public static TextureRegion CUBE_HUMAN;
+	public static TextureRegion CUBE_HUMAN_EYE;
 
 	public static Pixmap Cursor;
 
@@ -36,8 +37,19 @@ public class Res {
 		CUBE_WALL = newColorTexture(CUBE_SIZE, CUBE_SIZE, Color.DARK_GRAY);
 		CUBE_ROCK = newColorTexture(CUBE_SIZE, CUBE_SIZE, new Color(0.67f, 0.67f, 0.67f, 1));
 		CUBE_HUMAN = newHumanImage();
+		CUBE_HUMAN_EYE = newHumanEyeImage();
 
 		Cursor = newCursorPixmap();
+	}
+
+	private static TextureRegion newHumanEyeImage() {
+		Pixmap pixmap = new Pixmap(CUBE_SIZE, CUBE_SIZE, Format.RGBA8888);
+		pixmap.setColor(Color.BLACK);
+		pixmap.fillCircle(CUBE_SIZE * 3 / 10, CUBE_SIZE * 3 / 7, CUBE_SIZE / 12);
+		pixmap.fillCircle(CUBE_SIZE * 7 / 10, CUBE_SIZE * 3 / 7, CUBE_SIZE / 12);
+		TextureRegion texture = new TextureRegion(new Texture(pixmap));
+		pixmap.dispose();
+		return texture;
 	}
 
 	private static TextureRegion newHumanImage() {
@@ -45,9 +57,6 @@ public class Res {
 		pixmap.setColor(new Color(0.8f, 0.1f, 0.1f, 1f));
 		pixmap.fillRectangle(CUBE_BORDER_WIDTH_THIN, CUBE_BORDER_WIDTH_THIN, CUBE_SIZE - CUBE_BORDER_WIDTH_THIN * 2,
 				CUBE_SIZE - CUBE_BORDER_WIDTH_THIN * 2);
-		pixmap.setColor(Color.BLACK);
-		pixmap.fillCircle(CUBE_SIZE * 3 / 10, CUBE_SIZE * 3 / 7, CUBE_SIZE / 12);
-		pixmap.fillCircle(CUBE_SIZE * 7 / 10, CUBE_SIZE * 3 / 7, CUBE_SIZE / 12);
 		TextureRegion texture = new TextureRegion(new Texture(pixmap));
 		pixmap.dispose();
 		return texture;

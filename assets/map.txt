@@ -7,20 +7,33 @@ W  R   WW
 W       W
 WWW     W
 W    R  W
-W  a    W
+W  abW  W
 W       W
 WWWWWWWWW
 
 index=aa
+view=a
 size=3*3
 map=
 WWW
-M a
+WM 
 WWW
 
 index=aaa
+size=5*5
+map=
+WWWWWWWWW
+W       W
+W      RW
+W      R
+W    W RW
+W       W
+WWWWWWWWW
+
+index=ab
 size=3*3
+text=WASD to move, z to undo
 map=
 WWW
-W  
+  W
 WWW

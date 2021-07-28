@@ -106,7 +106,7 @@ public class WorldData {
 							break;
 						}
 						if (Character.isLowerCase(curChar) || Character.isDigit(curChar)) {
-							cube = new MapCube(curChar);
+							cube = new MapCube(curMapData.coor + curChar);
 						}
 						if (cube != null) {
 							cube.originPosition.x = w;

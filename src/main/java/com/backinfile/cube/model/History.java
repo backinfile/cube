@@ -6,9 +6,14 @@ import java.util.List;
 import com.backinfile.cube.model.cubes.Cube;
 
 public class History {
-	private static class Movement {
+	public static class Movement {
 		public Cube cube;
-		public Position lastPosition;
+		public Position position;
+		
+		@Override
+		public String toString() {
+			return cube.toString() + "<-" + position;
+		}
 	}
 
 	private List<Movement> movements = new ArrayList<>();
@@ -21,15 +26,25 @@ public class History {
 		for (Cube cube : cubes) {
 			Movement movement = new Movement();
 			movement.cube = cube;
-			movement.lastPosition = cube.position.copy();
+			movement.position = cube.position.copy();
 			history.movements.add(movement);
 		}
 		return history;
 	}
 
+	// TODO
 	public void playback() {
 		for (Movement movement : movements) {
-			movement.cube.position.setPosition(movement.lastPosition);
+			movement.cube.position.setPosition(movement.position);
 		}
+	}
+	
+	public List<Movement> getMovements() {
+		return movements;
+	}
+	
+	@Override
+	public String toString() {
+		return movements.toString();
 	}
 }

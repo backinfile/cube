@@ -16,6 +16,7 @@ public class CubeView extends Group {
 	private Image mainImage;
 	private Image borderImage;
 	private Image[] borderAsideImages;
+	private Image humanEyeImage;
 
 	public CubeView(Cube cube) {
 		this.cube = cube;
@@ -36,7 +37,9 @@ public class CubeView extends Group {
 			addActor(borderAsideImages[3]);
 		} else if (cube instanceof Human) {
 			mainImage = new Image(Res.CUBE_HUMAN);
+			humanEyeImage = new Image(Res.CUBE_HUMAN_EYE);
 			addActor(mainImage);
+			addActor(humanEyeImage);
 		}
 	}
 

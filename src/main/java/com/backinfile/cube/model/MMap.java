@@ -2,6 +2,7 @@ package com.backinfile.cube.model;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.StringJoiner;
 
@@ -35,6 +36,20 @@ public class MMap<T extends WorldUnit> {
 
 	public T get(Position position) {
 		return get(position.x, position.y);
+	}
+
+	/**
+	 * 按对象删除
+	 */
+	public boolean remove(T unit) {
+		for (Iterator<T> iter = unitList.iterator(); iter.hasNext();) {
+			T value = iter.next();
+			if (value == unit) {
+				iter.remove();
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public List<T> getUnitList() {

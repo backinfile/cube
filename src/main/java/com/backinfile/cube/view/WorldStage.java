@@ -55,6 +55,25 @@ public class WorldStage extends Stage {
 		return viewGroups.computeIfAbsent(coor, key -> new Group());
 	}
 
+	public CubeView removeCubeView(String coor, Cube cube) {
+		Group cubeGroup = getCubeGroup(coor);
+		for (Actor actor : cubeGroup.getChildren()) {
+			if (actor instanceof CubeView) {
+				CubeView cubeView = (CubeView) actor;
+				if (cubeView.getCube() == cube) {
+					cubeView.remove();
+					return cubeView;
+				}
+			}
+		}
+		return null;
+	}
+
+	public void addCubeView(String coor, CubeView cubeView) {
+		Group cubeGroup = getCubeGroup(coor);
+		cubeGroup.addActor(cubeView);
+	}
+
 	public List<CubeView> getCubeViews(String coor) {
 		List<CubeView> cubeViews = new ArrayList<>();
 		Group group = viewGroups.get(coor);

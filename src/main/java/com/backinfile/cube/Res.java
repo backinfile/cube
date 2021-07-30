@@ -10,6 +10,9 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 
 @SuppressWarnings("unused")
 public class Res {
@@ -17,19 +20,27 @@ public class Res {
 	public static final int CUBE_BORDER_WIDTH = 3;
 	public static final int CUBE_BORDER_WIDTH_THIN = 1;
 
-	public static TextureRegion CUBE_BORDER_BLACK;
-	public static TextureRegion CUBE_BORDER_WHITE;
-	public static TextureRegion CUBE_BORDER_DARK;
-	public static TextureRegion[] CUBE_BORDER_ASIDE;
+	public static TextureRegionDrawable TEX_WHITE;
+	public static TextureRegionDrawable TEX_BLACK;
+	public static TextureRegionDrawable TEX_GRAY;
+	public static TextureRegionDrawable TEX_LIGHT;
+	public static TextureRegionDrawable TEX_DARK;
+	public static TextureRegionDrawable TEX_BLUE;
 
-	public static TextureRegion CUBE_FLOWER;
-	public static TextureRegion CUBE_WALL;
-	public static TextureRegion CUBE_ROCK;
-	public static TextureRegion CUBE_TARGET;
-	public static TextureRegion CUBE_HUMAN;
-	public static TextureRegion CUBE_HUMAN_EYE;
+	public static TextureRegionDrawable CUBE_BORDER_BLACK;
+	public static TextureRegionDrawable CUBE_BORDER_WHITE;
+	public static TextureRegionDrawable CUBE_BORDER_DARK;
+	public static TextureRegionDrawable[] CUBE_BORDER_ASIDE;
+
+	public static TextureRegionDrawable CUBE_FLOWER;
+	public static TextureRegionDrawable CUBE_WALL;
+	public static TextureRegionDrawable CUBE_ROCK;
+	public static TextureRegionDrawable CUBE_TARGET;
+	public static TextureRegionDrawable CUBE_HUMAN;
+	public static TextureRegionDrawable CUBE_HUMAN_EYE;
 
 	public static Pixmap Cursor;
+	public static TextureRegionDrawable TextFieldCursor;
 
 	public static BitmapFont DefaultFontSmallSamll;
 	public static BitmapFont DefaultFontSmall;
@@ -49,6 +60,14 @@ public class Res {
 	}
 
 	private static void initImage() {
+
+		TEX_BLACK = newColorTexture(8, 8, Color.BLACK);
+		TEX_DARK = newColorTexture(8, 8, Color.DARK_GRAY);
+		TEX_GRAY = newColorTexture(8, 8, Color.GRAY);
+		TEX_LIGHT = newColorTexture(8, 8, Color.LIGHT_GRAY);
+		TEX_WHITE = newColorTexture(8, 8, Color.WHITE);
+		TEX_BLUE = newColorTexture(8, 8, Color.BLUE);
+
 		CUBE_BORDER_BLACK = newBorderImage(Color.BLACK);
 		CUBE_BORDER_WHITE = newBorderImage(Color.WHITE);
 		CUBE_BORDER_DARK = newBorderImage(Color.DARK_GRAY);
@@ -61,6 +80,16 @@ public class Res {
 		CUBE_HUMAN_EYE = newHumanEyeImage();
 
 		Cursor = newCursorPixmap();
+		TextFieldCursor = newTextFieldCursorPixmap();
+	}
+
+	private static TextureRegionDrawable newTextFieldCursorPixmap() {
+		Pixmap pixmap = new Pixmap(3, Res.CUBE_SIZE, Format.RGBA8888);
+		pixmap.setColor(Color.WHITE);
+		pixmap.drawLine(2, 0, 2, Res.CUBE_SIZE);
+		TextureRegion texture = new TextureRegion(new Texture(pixmap));
+		pixmap.dispose();
+		return new TextureRegionDrawable(texture);
 	}
 
 	private static void initFont() {
@@ -79,36 +108,36 @@ public class Res {
 		generator.dispose();
 	}
 
-	private static TextureRegion newHumanEyeImage() {
+	private static TextureRegionDrawable newHumanEyeImage() {
 		Pixmap pixmap = new Pixmap(CUBE_SIZE, CUBE_SIZE, Format.RGBA8888);
 		pixmap.setColor(Color.BLACK);
 		pixmap.fillCircle(CUBE_SIZE * 3 / 10, CUBE_SIZE * 3 / 7, CUBE_SIZE / 12);
 		pixmap.fillCircle(CUBE_SIZE * 7 / 10, CUBE_SIZE * 3 / 7, CUBE_SIZE / 12);
 		TextureRegion texture = new TextureRegion(new Texture(pixmap));
 		pixmap.dispose();
-		return texture;
+		return new TextureRegionDrawable(texture);
 	}
 
-	private static TextureRegion newHumanImage() {
+	private static TextureRegionDrawable newHumanImage() {
 		Pixmap pixmap = new Pixmap(CUBE_SIZE, CUBE_SIZE, Format.RGBA8888);
 		pixmap.setColor(new Color(0.8f, 0.1f, 0.1f, 1f));
 		pixmap.fillRectangle(CUBE_BORDER_WIDTH_THIN, CUBE_BORDER_WIDTH_THIN, CUBE_SIZE - CUBE_BORDER_WIDTH_THIN * 2,
 				CUBE_SIZE - CUBE_BORDER_WIDTH_THIN * 2);
 		TextureRegion texture = new TextureRegion(new Texture(pixmap));
 		pixmap.dispose();
-		return texture;
+		return new TextureRegionDrawable(texture);
 	}
 
-	private static TextureRegion newBorderImage(Color color) {
+	private static TextureRegionDrawable newBorderImage(Color color) {
 		Pixmap pixmap = new Pixmap(CUBE_SIZE, CUBE_SIZE, Format.RGBA8888);
 		pixmap.setColor(color);
 		DrawUtils.drawBorder(pixmap, 1);
 		TextureRegion texture = new TextureRegion(new Texture(pixmap));
 		pixmap.dispose();
-		return texture;
+		return new TextureRegionDrawable(texture);
 	}
 
-	private static TextureRegion[] newBorderAsideImage(Color color) {
+	private static TextureRegionDrawable[] newBorderAsideImage(Color color) {
 		Pixmap pixmap = new Pixmap(CUBE_SIZE, CUBE_SIZE, Format.RGBA8888);
 		pixmap.setColor(color);
 		pixmap.fillRectangle(0, 0, CUBE_SIZE, CUBE_BORDER_WIDTH);
@@ -129,7 +158,8 @@ public class Res {
 		pixmap.fillRectangle(CUBE_SIZE - CUBE_BORDER_WIDTH, 0, CUBE_SIZE, CUBE_SIZE);
 		TextureRegion texture3 = new TextureRegion(new Texture(pixmap));
 		pixmap.dispose();
-		return new TextureRegion[] { texture0, texture1, texture2, texture3 };
+		return new TextureRegionDrawable[] { new TextureRegionDrawable(texture0), new TextureRegionDrawable(texture1),
+				new TextureRegionDrawable(texture2), new TextureRegionDrawable(texture3) };
 	}
 
 	private static Pixmap newCursorPixmap() {
@@ -139,13 +169,13 @@ public class Res {
 		return pixmap;
 	}
 
-	private static TextureRegion newColorTexture(int width, int height, Color color) {
+	private static TextureRegionDrawable newColorTexture(int width, int height, Color color) {
 		Pixmap pixmap = new Pixmap(width, height, Format.RGBA8888);
 		pixmap.setColor(color);
 		pixmap.fill();
 		TextureRegion texture = new TextureRegion(new Texture(pixmap));
 		pixmap.dispose();
-		return texture;
+		return new TextureRegionDrawable(texture);
 	}
 
 	private static String getDefaultWorldConf() {
@@ -154,5 +184,9 @@ public class Res {
 
 	private static String getDefaultZHCharacter() {
 		return Gdx.files.internal("font/zh3500.txt").readString("utf8");
+	}
+
+	public static Label newDefaultLabel(String text) {
+		return new Label(text, new LabelStyle(DefaultFont, Color.WHITE));
 	}
 }

@@ -1,4 +1,4 @@
-package com.backinfile.cube.view;
+package com.backinfile.cube.view.editor;
 
 import com.backinfile.cube.Settings;
 import com.backinfile.cube.controller.GameManager;
@@ -9,42 +9,41 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 
-public class GameScreen implements Screen {
+public class EditorScreen implements Screen {
 
 	private TimerQueue timerQueue;
-	private WorldStage worldStage;
+	private EditorStage editorStage;
 
 	@Override
 	public void show() {
 		if (timerQueue == null) {
 			timerQueue = new TimerQueue();
-			GameManager.instance.timerQueue = timerQueue;
 		}
-		if (worldStage == null) {
-			worldStage = new WorldStage(new ExtendViewport(Settings.SCREEN_WIDTH, Settings.SCREEN_HEIGHT));
-			Gdx.input.setInputProcessor(new GamePlayInputProcessor(GameManager.instance));
-			GameManager.instance.worldStage = worldStage;
-			GameManager.instance.updateGameView();
+		if (editorStage == null) {
+			editorStage = new EditorStage(new ExtendViewport(Settings.SCREEN_WIDTH, Settings.SCREEN_HEIGHT));
+			Gdx.input.setInputProcessor(editorStage);
 		}
 
 	}
 
 	@Override
 	public void render(float delta) {
-		Gdx.gl.glClearColor(0.1f, 0.1f, 0.1f, 1);
+		Gdx.gl.glClearColor(0.5f, 0.5f, 0.5f, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		if (timerQueue != null) {
 			timerQueue.update();
 		}
-		if (worldStage != null) {
-			worldStage.act();
-			worldStage.draw();
+		if (editorStage != null) {
+			editorStage.act();
+			editorStage.draw();
 		}
 	}
 
 	@Override
 	public void resize(int width, int height) {
-		worldStage.getViewport().update(width, height, true);
+		if (editorStage != null) {
+			editorStage.getViewport().update(width, height, true);
+		}
 	}
 
 	@Override
@@ -61,8 +60,8 @@ public class GameScreen implements Screen {
 
 	@Override
 	public void dispose() {
-		if (worldStage != null) {
-			worldStage.dispose();
+		if (editorStage != null) {
+			editorStage.dispose();
 		}
 	}
 

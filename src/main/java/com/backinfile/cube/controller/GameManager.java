@@ -16,6 +16,7 @@ import com.backinfile.cube.model.WorldData;
 import com.backinfile.cube.model.cubes.Cube;
 import com.backinfile.cube.model.cubes.Human;
 import com.backinfile.cube.model.cubes.Wall;
+import com.backinfile.cube.support.TimerQueue;
 import com.backinfile.cube.support.Utils;
 import com.backinfile.cube.view.CubeView;
 import com.backinfile.cube.view.WorldStage;
@@ -26,6 +27,7 @@ public class GameManager {
 
 	public WorldData worldData;
 	public WorldStage worldStage;
+	public TimerQueue timerQueue;
 
 	public String curWorldCoor;
 	private Human human;

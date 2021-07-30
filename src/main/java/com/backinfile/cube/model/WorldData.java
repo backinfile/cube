@@ -1,6 +1,8 @@
 package com.backinfile.cube.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import com.backinfile.cube.Log;
@@ -13,6 +15,16 @@ public class WorldData {
 	private List<MapData> datas = new ArrayList<>();
 
 	public List<MapData> getDatas() {
+		return datas;
+	}
+
+	public List<MapData> getOrderedDatas() {
+		Collections.sort(datas, new Comparator<MapData>() {
+			@Override
+			public int compare(MapData o1, MapData o2) {
+				return o1.coor.compareTo(o2.coor);
+			}
+		});
 		return datas;
 	}
 

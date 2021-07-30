@@ -84,6 +84,16 @@ public class MMap<T extends WorldUnit> {
 		}
 	}
 
+	public void setSize(int width, int height) {
+		this.width = width;
+		this.height = height;
+		for (T unit : getUnitList()) {
+			if (!inMap(unit.position.x, unit.position.y)) {
+				remove(unit);
+			}
+		}
+	}
+
 	@Override
 	public String toString() {
 		StringJoiner sj = new StringJoiner("\n");

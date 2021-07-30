@@ -1,16 +1,12 @@
 package com.backinfile.cube.view.editor;
 
-import com.backinfile.cube.Log;
 import com.backinfile.cube.Res;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
-import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldStyle;
-import com.badlogic.gdx.scenes.scene2d.utils.FocusListener;
 import com.badlogic.gdx.utils.Align;
 
 public class MapBar extends Group {
@@ -23,7 +19,7 @@ public class MapBar extends Group {
 		textButtonStyle.font = Res.DefaultFont;
 		textButtonStyle.fontColor = Color.WHITE;
 		textButton = new LineButton("default");
-		textButton.setSize(width / 2, height * 4 / 5);
+		textButton.setSize(width * 2 / 3, height * 4 / 5);
 		textButton.setPosition(0, height / 10);
 
 		TextFieldStyle textFieldStyle = new TextFieldStyle();
@@ -32,8 +28,8 @@ public class MapBar extends Group {
 		textFieldStyle.cursor = Res.TextFieldCursor;
 		textFieldStyle.selection = Res.TEX_BLUE;
 		textField = new TextField("9*9", textFieldStyle);
-		textField.setSize(width / 2, height);
-		textField.setPosition(width / 2, 0);
+		textField.setSize(width / 3, height);
+		textField.setPosition(width * 2 / 3, 0);
 		textField.setAlignment(Align.center);
 
 		addActor(textButton);

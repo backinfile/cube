@@ -28,4 +28,19 @@ public class MapData {
 		}
 		return false;
 	}
+
+	public void setSize(int width, int height) {
+		this.width = width;
+		this.height = height;
+		if (cubeMap != null) {
+			cubeMap.setSize(width, height);
+		} else {
+			cubeMap = new MMap<Cube>(width, height);
+		}
+		if (floorMap != null) {
+			floorMap.setSize(width, height);
+		} else {
+			floorMap = new MMap<Floor>(width, height);
+		}
+	}
 }

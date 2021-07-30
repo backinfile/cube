@@ -51,7 +51,9 @@ public class EditorCubeView extends Group {
 
 	public void setType(Cube cube) {
 		hideChildren();
-		if (cube instanceof Rock) {
+		if (cube == null) {
+
+		} else if (cube instanceof Rock) {
 			mainImage.setDrawable(Res.CUBE_ROCK);
 			mainImage.setVisible(true);
 		} else if (cube instanceof Wall) {

@@ -5,15 +5,13 @@ import com.backinfile.cube.Res;
 import com.backinfile.cube.model.MapData;
 import com.backinfile.cube.model.WorldData;
 import com.backinfile.cube.support.Assertion;
-import com.backinfile.cube.support.ObjectPool;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.FocusListener;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
@@ -23,7 +21,6 @@ public class EditorStage extends Stage {
 	private MapData curMapData;
 	private CubeGroup cubeGroup;
 	private MapBarGroup mapBarGroup;
-	private Image background = new Image(Res.TEX_DARK);
 	private Label curCoorLabel = Res.newDefaultLabel("[coor]");
 
 	public EditorStage(Viewport viewport) {
@@ -43,12 +40,9 @@ public class EditorStage extends Stage {
 		worldData.getDatas().add(curMapData);
 
 		// 初始化view
-		background.setSize(getWidth(), getHeight());
-		addActor(background);
 		curCoorLabel.setPosition(getWidth() / 2, getHeight() - Res.CUBE_SIZE);
 		addActor(curCoorLabel);
-		mapBarGroup = new MapBarGroup(getWidth() / 5, getHeight() * 5 / 6);
-		mapBarGroup.setPosition(0, getHeight() / 12);
+		mapBarGroup = new MapBarGroup(getWidth() / 5, getHeight() * 11 / 12);
 		addActor(mapBarGroup);
 
 		// 初始化cube
@@ -69,29 +63,20 @@ public class EditorStage extends Stage {
 		addListener(new FocusListener() {
 			@Override
 			public void keyboardFocusChanged(FocusEvent event, Actor actor, boolean focused) {
-				if (!focused && actor instanceof TextField) {
-					if (actor.getParent() instanceof MapBar) {
-						MapBar mapBar = (MapBar) actor.getParent();
-						String inputText = mapBar.getInputText();
-						Log.view.info("unfocused:{}", inputText);
-						try {
-							String[] split = inputText.split("\\*");
-							Assertion.assertEqual(split.length, 2);
-							int width = Integer.valueOf(split[0]);
-							int height = Integer.valueOf(split[1]);
-							Assertion.assertLargeThen(CubeGroup.CUBE_LENGTH, width);
-							Assertion.assertLargeThen(CubeGroup.CUBE_LENGTH, height);
-							MapData mapData = worldData.getMapData(mapBar.getText());
-							mapData.setSize(width, height);
-							if (curMapData == mapData) {
-								updateView();
-							}
-						} catch (Exception e) {
-							mapBar.setInputText("9*9");
-						}
-					}
+				if (!focused && actor instanceof TextField && actor.getParent() instanceof MapBar) {
+					onChangeMapSize((MapBar) actor.getParent());
 				}
 			}
+		});
+
+		addListener(new ClickListener() {
+			@Override
+			public void clicked(InputEvent event, float x, float y) {
+				if (event.getTarget() instanceof EditorCubeView) {
+					onChangeCubeType((EditorCubeView) event.getTarget());
+				}
+			}
+
 		});
 
 	}
@@ -100,5 +85,27 @@ public class EditorStage extends Stage {
 		curCoorLabel.setText(curMapData.coor);
 		mapBarGroup.setByData(worldData, curMapData.coor);
 		cubeGroup.setByData(curMapData);
+	}
+
+	private void onChangeMapSize(MapBar mapBar) {
+		MapData mapData = worldData.getMapData(mapBar.getText());
+		String inputText = mapBar.getInputText();
+		Log.view.info("unfocused:{}", inputText);
+		try {
+			String[] split = inputText.split("\\*");
+			Assertion.assertEqual(split.length, 2);
+			int width = Integer.valueOf(split[0]);
+			int height = Integer.valueOf(split[1]);
+			Assertion.assertEqual(width, height);
+			Assertion.assertLargeThen(CubeGroup.CUBE_LENGTH, width);
+			Assertion.assertLargeThen(CubeGroup.CUBE_LENGTH, height);
+			mapData.setSize(width, height);
+		} catch (Exception e) {
+		}
+		updateView();
+	}
+
+	private void onChangeCubeType(EditorCubeView editorCubeView) {
+
 	}
 }

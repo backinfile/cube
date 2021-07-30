@@ -17,6 +17,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.utils.Align;
 
 public class EditorCubeView extends Group {
+	private Cube cube;
 	private Image mainImage = new Image(Res.CUBE_ROCK);
 	private Image borderImage = new Image(Res.CUBE_BORDER_DARK);
 	private Image humanEyeImage = new Image(Res.CUBE_HUMAN_EYE);
@@ -49,7 +50,7 @@ public class EditorCubeView extends Group {
 		}
 	}
 
-	public void setType(Cube cube) {
+	public void setCube(Cube cube) {
 		hideChildren();
 		if (cube == null) {
 

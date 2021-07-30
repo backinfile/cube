@@ -16,8 +16,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 
 @SuppressWarnings("unused")
 public class Res {
-	public static final int CUBE_SIZE = 50;
-	public static final int CUBE_BORDER_WIDTH = 3;
+	public static final int CUBE_SIZE = Settings.SCREEN_HEIGHT / 12;
+	public static final int CUBE_BORDER_WIDTH = CUBE_SIZE * 5 / 50;
 	public static final int CUBE_BORDER_WIDTH_THIN = 1;
 
 	public static TextureRegionDrawable TEX_WHITE;

@@ -1,20 +1,21 @@
 package com.backinfile.cube.view.editor;
 
+import com.backinfile.cube.Log;
 import com.backinfile.cube.Res;
+import com.backinfile.cube.model.MapCube;
 import com.backinfile.cube.model.MapData;
+import com.backinfile.cube.model.cubes.Cube;
+import com.backinfile.cube.model.cubes.Human;
+import com.backinfile.cube.model.cubes.Rock;
+import com.backinfile.cube.model.cubes.Wall;
 import com.badlogic.gdx.scenes.scene2d.Group;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
 
 public class CubeGroup extends Group {
 	private EditorCubeView[][] cubeViews;
-	private Image background = new Image(Res.CUBE_BORDER_WHITE);
 
 	public static final int CUBE_LENGTH = 11;
 
 	public CubeGroup() {
-		setSize(Res.CUBE_SIZE * CUBE_LENGTH, Res.CUBE_SIZE * CUBE_LENGTH);
-		background.setSize(getWidth(), getHeight());
-		addActor(background);
 
 		cubeViews = new EditorCubeView[CUBE_LENGTH][CUBE_LENGTH];
 		for (int i = 0; i < CUBE_LENGTH; i++) {
@@ -32,16 +33,31 @@ public class CubeGroup extends Group {
 	public void setByData(MapData mapData) {
 		for (int i = 0; i < CUBE_LENGTH; i++) {
 			for (int j = 0; j < CUBE_LENGTH; j++) {
-				EditorCubeView editorCubeView = cubeViews[i][j];
-				editorCubeView.setVisible(false);
+				cubeViews[i][j].setVisible(false);
 			}
 		}
+		int offsetX = (CUBE_LENGTH - mapData.width) / 2;
+		int offsetY = (CUBE_LENGTH - mapData.height) / 2;
 		for (int i = 0; i < mapData.width; i++) {
 			for (int j = 0; j < mapData.height; j++) {
-				EditorCubeView editorCubeView = cubeViews[i][j];
+				EditorCubeView editorCubeView = cubeViews[i + offsetX][j + offsetY];
 				editorCubeView.setVisible(true);
-				editorCubeView.setType(mapData.cubeMap.get(i, j));
+				editorCubeView.setCube(mapData.cubeMap.get(i, j));
 			}
 		}
+	}
+
+	public static Cube getCubeNextType(Cube cube, String nextCoor) {
+		if (cube == null) {
+			return new Wall();
+		} else if (cube instanceof Wall) {
+			return new Rock();
+		} else if (cube instanceof Rock) {
+			return new Human();
+		} else if (cube instanceof Human) {
+			return new MapCube(nextCoor);
+		} else if (cube instanceof MapCube) {
+		}
+		return null;
 	}
 }

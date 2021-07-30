@@ -6,4 +6,5 @@ public class Human extends Cube {
 	public boolean isPushable() {
 		return false;
 	}
+
 }

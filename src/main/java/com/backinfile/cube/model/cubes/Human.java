@@ -7,4 +7,9 @@ public class Human extends Cube {
 		return false;
 	}
 
+	@Override
+	public boolean isEmpty() {
+		return false;
+	}
+
 }

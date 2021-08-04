@@ -12,9 +12,9 @@ size=9*9
 map=
 WWWWWWWWW
 W      dW
-W     WWW
+W e1  WWW
 W       W
-WWW a   W
+WWW     W
 W       W
 W    W   
 Wb   W  W
@@ -105,3 +105,24 @@ map=
 WWW
   W
 WWW
+
+
+index=aa1
+size=5*5
+text=向上
+map=
+WWWWW
+WW WW
+WW WW
+WW WW
+     
+
+index=aae
+size=5*5
+text=向上
+map=
+     
+  W  
+  W  
+  W  
+WWWWW

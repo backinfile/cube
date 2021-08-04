@@ -1,15 +1,14 @@
 package com.backinfile.cube.model;
 
 import com.backinfile.cube.model.cubes.Cube;
-import com.backinfile.cube.model.cubes.Floor;
 import com.backinfile.cube.model.cubes.Human;
+import com.backinfile.cube.model.cubes.Wall;
 
 public class MapData {
 	public String coor = ""; // 所处位置
 	public int width;
 	public int height;
 	public MMap<Cube> cubeMap; // 方块
-	public MMap<Floor> floorMap; // 地板标记
 	public String view = "";
 	public String tipText = "";
 
@@ -17,7 +16,6 @@ public class MapData {
 		this.width = width;
 		this.height = height;
 		cubeMap = new MMap<Cube>(width, height);
-		floorMap = new MMap<Floor>(width, height);
 	}
 
 	public boolean hasHuman() {
@@ -37,10 +35,26 @@ public class MapData {
 		} else {
 			cubeMap = new MMap<Cube>(width, height);
 		}
-		if (floorMap != null) {
-			floorMap.setSize(width, height);
-		} else {
-			floorMap = new MMap<Floor>(width, height);
+	}
+
+	public boolean isMatchWith(MapData other) {
+		if (width != other.width || height != other.height) {
+			return false;
 		}
+		for (int i = 0; i < width; i++) {
+			for (int j = 0; j < height; j++) {
+				int cnt = 0;
+				if (cubeMap.get(i, j) instanceof Wall) {
+					cnt++;
+				}
+				if (other.cubeMap.get(i, j) instanceof Wall) {
+					cnt++;
+				}
+				if (cnt != 1) {
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 }

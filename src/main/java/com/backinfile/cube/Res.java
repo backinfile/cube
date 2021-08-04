@@ -23,6 +23,7 @@ public class Res {
 	public static final int CUBE_SIZE = Settings.SCREEN_HEIGHT / 12;
 	public static final int CUBE_BORDER_WIDTH = CUBE_SIZE * 5 / 50;
 	public static final int CUBE_BORDER_WIDTH_THIN = 1;
+	public static final float FLOOR_ELE_ALPHA = 0.3f;
 
 	public static TextureRegionDrawable TEX_WHITE;
 	public static TextureRegionDrawable TEX_BLACK;
@@ -34,6 +35,7 @@ public class Res {
 	public static TextureRegionDrawable CUBE_BORDER_BLACK;
 	public static TextureRegionDrawable CUBE_BORDER_WHITE;
 	public static TextureRegionDrawable CUBE_BORDER_DARK;
+	public static TextureRegionDrawable CUBE_BORDER_BLUE;
 	public static TextureRegionDrawable[] CUBE_BORDER_ASIDE;
 
 	public static TextureRegionDrawable CUBE_FLOWER;
@@ -42,6 +44,7 @@ public class Res {
 	public static TextureRegionDrawable CUBE_TARGET;
 	public static TextureRegionDrawable CUBE_HUMAN;
 	public static TextureRegionDrawable CUBE_HUMAN_EYE;
+	public static TextureRegionDrawable CUBE_ALPHA_MASK;
 
 	public static Pixmap Cursor;
 	public static TextureRegionDrawable TextFieldCursor;
@@ -84,6 +87,7 @@ public class Res {
 		CUBE_BORDER_BLACK = getDrawable(newBorderImage(Color.BLACK));
 		CUBE_BORDER_WHITE = getDrawable(newBorderImage(Color.WHITE));
 		CUBE_BORDER_DARK = getDrawable(newBorderImage(Color.DARK_GRAY));
+		CUBE_BORDER_BLUE = getDrawable(newBorderImage(Color.BLUE));
 		Pixmap[] newBorderAsideImage = newBorderAsideImage(Color.BLACK);
 		CUBE_BORDER_ASIDE = new TextureRegionDrawable[] { getDrawable(newBorderAsideImage[0]),
 				getDrawable(newBorderAsideImage[1]), getDrawable(newBorderAsideImage[2]),
@@ -94,6 +98,7 @@ public class Res {
 		CUBE_ROCK = getDrawable(newRockImage(CUBE_SIZE));
 		CUBE_HUMAN = getDrawable(newHumanImage(CUBE_SIZE));
 		CUBE_HUMAN_EYE = getDrawable(newHumanEyeImage(CUBE_SIZE));
+		CUBE_ALPHA_MASK = getDrawable(newColorPixmap(CUBE_SIZE, CUBE_SIZE, new Color(1, 1, 1, 0.5f)));
 
 		Cursor = newCursorPixmap();
 		TextFieldCursor = getDrawable(newTextFieldCursorPixmap());
@@ -102,7 +107,8 @@ public class Res {
 	private static void initFont() {
 		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("font/msyh.ttc"));
 		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
-		parameter.characters = FreeTypeFontGenerator.DEFAULT_CHARS + DefaultWorldConfString;
+		parameter.characters += DefaultWorldConfString;
+		parameter.characters += DefaultWorldConfStringByTiled;
 
 //		parameter.size = 12;
 //		DefaultFontSmallSamll = generator.generateFont(parameter);

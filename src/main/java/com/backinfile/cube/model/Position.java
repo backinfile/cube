@@ -21,10 +21,18 @@ public class Position {
 		this.worldCoor = worldCoor;
 	}
 
+	public Position(Position position) {
+		setPosition(position);
+	}
+
 	public void setPosition(Position position) {
 		this.x = position.x;
 		this.y = position.y;
 		this.worldCoor = position.worldCoor;
+	}
+
+	public Vector sub(Position position) {
+		return new Vector(this.x - position.x, this.y - position.y);
 	}
 
 	public void setPosition(int x, int y) {
@@ -45,6 +53,7 @@ public class Position {
 	public Position getTranslated(Vector vector) {
 		return new Position(x + vector.x, y + vector.y, worldCoor);
 	}
+
 	public Position getTranslated(int x, int y) {
 		return new Position(x + this.x, y + this.y, worldCoor);
 	}

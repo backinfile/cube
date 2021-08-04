@@ -1,6 +1,9 @@
 package com.backinfile.cube.view;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,9 +23,9 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 
 public class WorldStage extends Stage {
 
-	private Group mainView;
+	private Group cubeGroupRoot;
 	private TextField tipText;
-	private Map<String, Group> viewGroups = new HashMap<>();
+	private Map<String, CubeViewGroup> viewGroups = new HashMap<>();
 
 	public WorldStage(Viewport viewport) {
 		super(viewport);
@@ -32,12 +35,12 @@ public class WorldStage extends Stage {
 
 	private void init() {
 		// 初始化方块
-		mainView = new Group();
-		mainView.setSize(this.getWidth(), this.getHeight());
-		addActor(mainView);
-		for (MapData mapData : GameManager.instance.worldData.getDatas()) {
+		cubeGroupRoot = new Group();
+		cubeGroupRoot.setSize(this.getWidth(), this.getHeight());
+		addActor(cubeGroupRoot);
+		for (MapData mapData : GameManager.instance.worldData.getMapDatas()) {
 			Group group = getCubeGroup(mapData.coor);
-			mainView.addActor(group);
+			cubeGroupRoot.addActor(group);
 			for (Cube cube : mapData.cubeMap.getUnitList()) {
 				group.addActor(new CubeView(cube));
 			}
@@ -66,8 +69,8 @@ public class WorldStage extends Stage {
 		return cubeViews;
 	}
 
-	public Group getCubeGroup(String coor) {
-		return viewGroups.computeIfAbsent(coor, key -> new Group());
+	public CubeViewGroup getCubeGroup(String coor) {
+		return viewGroups.computeIfAbsent(coor, key -> new CubeViewGroup());
 	}
 
 	public CubeView removeCubeView(String coor, Cube cube) {
@@ -103,8 +106,32 @@ public class WorldStage extends Stage {
 		return cubeViews;
 	}
 
+	public void updateCubeGroupLayer() {
+		List<CubeViewGroup> values = new ArrayList<>();
+		for (CubeViewGroup group : viewGroups.values()) {
+			if (group.isVisible()) {
+				values.add(group);
+			}
+		}
+		if (values.isEmpty()) {
+			return;
+		}
+		for (CubeViewGroup group : values) {
+			group.remove();
+		}
+		Collections.sort(values, new Comparator<CubeViewGroup>() {
+			@Override
+			public int compare(CubeViewGroup o1, CubeViewGroup o2) {
+				return Integer.compare(o1.getLayer(), o2.getLayer());
+			}
+		});
+		for (CubeViewGroup group : values) {
+			cubeGroupRoot.addActor(group);
+		}
+	}
+
 	public Group getMainView() {
-		return mainView;
+		return cubeGroupRoot;
 	}
 
 	public void setTipText(boolean visible, String content) {

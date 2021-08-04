@@ -5,4 +5,9 @@ public class Wall extends Cube {
 	public boolean isPushable() {
 		return false;
 	}
+
+	@Override
+	public boolean isEmpty() {
+		return false;
+	}
 }

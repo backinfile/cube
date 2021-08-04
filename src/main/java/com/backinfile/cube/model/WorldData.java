@@ -8,13 +8,15 @@ import java.util.List;
 import com.backinfile.cube.Log;
 import com.backinfile.cube.model.cubes.Cube;
 import com.backinfile.cube.model.cubes.Human;
+import com.backinfile.cube.model.cubes.Key;
+import com.backinfile.cube.model.cubes.MapCube;
 import com.backinfile.cube.model.cubes.Rock;
 import com.backinfile.cube.model.cubes.Wall;
 
 public class WorldData {
 	private List<MapData> datas = new ArrayList<>();
 
-	public List<MapData> getDatas() {
+	public List<MapData> getMapDatas() {
 		return datas;
 	}
 
@@ -123,8 +125,10 @@ public class WorldData {
 						default:
 							break;
 						}
-						if (Character.isLowerCase(curChar) || Character.isDigit(curChar)) {
+						if (Character.isLowerCase(curChar)) {
 							cube = new MapCube(curMapData.coor + curChar);
+						} else if (Character.isDigit(curChar)) {
+							cube = new Key(curMapData.coor + curChar);
 						}
 						if (cube != null) {
 							cube.originPosition.x = w;
@@ -142,5 +146,11 @@ public class WorldData {
 			world.datas.add(curMapData);
 		}
 		return world;
+	}
+
+	public static WorldData parseFromTiled(String conf) {
+		WorldData worldData = new WorldData();
+
+		return worldData;
 	}
 }

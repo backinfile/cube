@@ -24,12 +24,26 @@ public class MMap<T extends WorldUnit> {
 		unitList.add(unit);
 	}
 
-	public T get(int x, int y) {
+	public List<T> getAll(int x, int y) {
+		List<T> list = new ArrayList<>();
 		checkSize(x, y);
 		for (T unit : unitList) {
 			if (unit.position.x == x && unit.position.y == y) {
+				list.add(unit);
+			}
+		}
+		return list;
+	}
+
+	public T get(int x, int y) {
+		List<T> all = getAll(x, y);
+		for (T unit : all) {
+			if (unit.isSelectedFirst()) {
 				return unit;
 			}
+		}
+		if (!all.isEmpty()) {
+			return all.get(0);
 		}
 		return null;
 	}

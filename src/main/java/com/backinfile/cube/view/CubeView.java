@@ -3,6 +3,7 @@ package com.backinfile.cube.view;
 import com.backinfile.cube.Res;
 import com.backinfile.cube.model.cubes.Cube;
 import com.backinfile.cube.model.cubes.Human;
+import com.backinfile.cube.model.cubes.MapCube;
 import com.backinfile.cube.model.cubes.Rock;
 import com.backinfile.cube.model.cubes.Wall;
 import com.badlogic.gdx.graphics.g2d.Batch;
@@ -13,6 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 
 public class CubeView extends Group {
 	private Cube cube;
+	private float alpha = 1f;
 
 	private Image mainImage;
 	private Image borderImage;
@@ -41,6 +43,10 @@ public class CubeView extends Group {
 			humanEyeImage = new Image(Res.CUBE_HUMAN_EYE);
 			addActor(mainImage);
 			addActor(humanEyeImage);
+		} else if (cube instanceof MapCube) {
+			mainImage = new Image(Res.CUBE_BORDER_BLUE);
+			mainImage.setVisible(false);
+			addActor(mainImage);
 		}
 	}
 
@@ -51,9 +57,9 @@ public class CubeView extends Group {
 	public void setAsideBorder(int index, boolean open) {
 		borderAsideImages[index].setVisible(!open);
 	}
-	
+
 	public void setWallBorder(boolean[] neighbor) {
-		
+
 	}
 
 	public void setHumanEyeOffset(float x, float y) {
@@ -79,6 +85,14 @@ public class CubeView extends Group {
 		return cube;
 	}
 
+	public void setAlpha(float alpha) {
+		this.alpha = alpha;
+	}
+
+	public void setMainImageVisible(boolean visible) {
+		mainImage.setVisible(visible);
+	}
+
 	@Override
 	public void act(float delta) {
 		super.act(delta);
@@ -86,7 +100,7 @@ public class CubeView extends Group {
 
 	@Override
 	public void draw(Batch batch, float parentAlpha) {
-		super.draw(batch, parentAlpha);
+		super.draw(batch, parentAlpha * alpha);
 	}
 
 }

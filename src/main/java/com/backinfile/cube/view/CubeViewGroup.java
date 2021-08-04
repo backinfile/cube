@@ -6,6 +6,10 @@ public class CubeViewGroup extends Group {
 	// 默认为0，越小距离屏幕越远
 	private int layer = 0;
 
+	public CubeViewGroup() {
+		setVisible(false);
+	}
+
 	public void setLayer(int layer) {
 		this.layer = layer;
 	}

@@ -1,8 +1,10 @@
 package com.backinfile.cube.controller;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import com.backinfile.cube.Log;
 import com.backinfile.cube.Res;
@@ -23,6 +25,7 @@ import com.backinfile.cube.support.Utils;
 import com.backinfile.cube.view.CubeView;
 import com.backinfile.cube.view.CubeViewGroup;
 import com.backinfile.cube.view.WorldStage;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction;
 
@@ -39,6 +42,7 @@ public class GameManager {
 	private Vector lastHumanMove = new Vector();
 	private float humanMoveToX;
 	private float humanMoveToY;
+	private Set<Actor> viewLast = new HashSet<>();
 
 	public static final int[] dx = new int[] { 0, 0, -1, 1 };
 	public static final int[] dy = new int[] { 1, -1, 0, 0 };
@@ -114,6 +118,20 @@ public class GameManager {
 //		mainView.setPosition((worldStage.getWidth() - width) / 2, (worldStage.getHeight() - height) / 2);
 //		ActionUtils.moveTo(mainView, (worldStage.getWidth() - width) / 2, (worldStage.getHeight() - height) / 2);
 
+		// 记录上次已经显示的
+		viewLast.clear();
+		for (MapData mapData : worldData.getMapDatas()) {
+			Group group = worldStage.getCubeGroup(mapData.coor);
+			if (group.isVisible()) {
+				viewLast.add(group);
+				for (Actor actor : group.getChildren()) {
+					if (actor.isVisible() && actor instanceof CubeView) {
+						viewLast.add(actor);
+					}
+				}
+			}
+		}
+
 		// 先隐藏所有方块
 		for (MapData mapData : worldData.getMapDatas()) {
 			Group group = worldStage.getCubeGroup(mapData.coor);
@@ -123,8 +141,16 @@ public class GameManager {
 		updateCubeGroupView(curWorldCoor, 0, 0, curMap.width * Res.CUBE_SIZE, curMap.height * Res.CUBE_SIZE, 1f, 0);
 		worldStage.updateCubeGroupLayer();
 
-		ActionUtils.moveTo(mainView, (worldStage.getWidth() / 2 - humanMoveToX),
-				(worldStage.getHeight() / 2 - humanMoveToY));
+		Position lastPosition = human.getLastPosition();
+		if (lastPosition != null && lastPosition.worldCoor.equals(human.position.worldCoor)) {
+			ActionUtils.moveTo(mainView, (worldStage.getWidth() / 2 - humanMoveToX),
+					(worldStage.getHeight() / 2 - humanMoveToY), 0.3f);
+		} else {
+			mainView.setPosition((worldStage.getWidth() / 2 - humanMoveToX),
+					(worldStage.getHeight() / 2 - humanMoveToY));
+			Log.game.info("humanMoveTo:{} {},{}  {},{}", human.position.worldCoor, humanMoveToX, humanMoveToY,
+					(worldStage.getWidth() / 2 - humanMoveToX), (worldStage.getHeight() / 2 - humanMoveToY));
+		}
 	}
 
 	private void updateCubeGroupView(String coor, float x, float y, float width, float height, float alpha, int layer) {
@@ -136,21 +162,31 @@ public class GameManager {
 		CubeViewGroup group = worldStage.getCubeGroup(coor);
 		group.setLayer(layer - (alpha < 1f ? 1 : 0));
 		group.setSize(width, height);
-		ActionUtils.moveTo(group, x, y);
-		ActionUtils.sizeTo(group, width, height);
+		if (viewLast.contains(group)) {
+			ActionUtils.moveTo(group, x, y);
+			ActionUtils.sizeTo(group, width, height);
+		} else {
+			group.setPosition(x, y);
+			group.setSize(width, height);
+		}
 		group.setVisible(true);
 		float cubeWidth = width / mapData.width;
 		float cubeHeight = height / mapData.height;
 		for (CubeView cubeView : worldStage.getCubeViews(coor)) {
 			Cube cube = cubeView.getCube();
-			
+
 			Position lastPosition = cube.getLastPosition();
-			if (lastPosition != null && lastPosition.worldCoor != cube.position.worldCoor) {
+			if ((lastPosition != null && lastPosition.worldCoor != cube.position.worldCoor)) {
 				cubeView.setPosition(cube.position.x * cubeWidth, cube.position.y * cubeHeight);
 			} else {
 				ActionUtils.moveTo(cubeView, cube.position.x * cubeWidth, cube.position.y * cubeHeight);
 			}
-			ActionUtils.sizeTo(cubeView, cubeWidth, cubeHeight);
+
+			if (viewLast.contains(cubeView)) {
+				ActionUtils.sizeTo(cubeView, cubeWidth, cubeHeight);
+			} else {
+				cubeView.setSize(cubeWidth, cubeHeight);
+			}
 			cubeView.setAlpha(alpha);
 			if (cube instanceof MapCube) {
 				cubeView.setMainImageVisible(((MapCube) cube).isFitKey());
@@ -164,6 +200,7 @@ public class GameManager {
 				cubeView.setHumanEyeOffset(lastHumanMove.x * cubeWidth / 10, lastHumanMove.y * cubeHeight / 10);
 				humanMoveToX = x + cube.position.x * cubeWidth;
 				humanMoveToY = y + cube.position.y * cubeHeight;
+				cubeView.setSize(cubeWidth, cubeHeight);
 			}
 		}
 

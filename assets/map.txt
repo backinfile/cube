@@ -41,7 +41,7 @@ WWWWW
 
 index=aaba
 size=7*7
-view=aab
+#view=aab
 map=
 WWWWWWW
 W     W
@@ -52,7 +52,7 @@ W     W
 WWWWWWW
 
 index=aabb
-view=aab
+#view=aab
 size=3*3
 map=
 WWW

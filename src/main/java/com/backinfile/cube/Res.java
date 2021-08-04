@@ -67,7 +67,7 @@ public class Res {
 
 	private static TextureRegionDrawable getDrawable(Pixmap pixmap) {
 		TextureRegion region = new TextureRegion(new Texture(pixmap));
-		pixmap.dispose();
+//		pixmap.dispose();
 		return new TextureRegionDrawable(region);
 	}
 
@@ -87,11 +87,12 @@ public class Res {
 		CUBE_BORDER_BLACK = getDrawable(newBorderImage(Color.BLACK));
 		CUBE_BORDER_WHITE = getDrawable(newBorderImage(Color.WHITE));
 		CUBE_BORDER_DARK = getDrawable(newBorderImage(Color.DARK_GRAY));
-		CUBE_BORDER_BLUE = getDrawable(newBorderImage(Color.BLUE));
+		CUBE_BORDER_BLUE = getDrawable(newBorderImage(new Color(0, 0, 1f, 0.5f)));
 		Pixmap[] newBorderAsideImage = newBorderAsideImage(Color.BLACK);
-		CUBE_BORDER_ASIDE = new TextureRegionDrawable[] { getDrawable(newBorderAsideImage[0]),
-				getDrawable(newBorderAsideImage[1]), getDrawable(newBorderAsideImage[2]),
-				getDrawable(newBorderAsideImage[3]), };
+		CUBE_BORDER_ASIDE = new TextureRegionDrawable[newBorderAsideImage.length];
+		for (int i = 0; i < newBorderAsideImage.length; i++) {
+			CUBE_BORDER_ASIDE[i] = getDrawable(newBorderAsideImage[i]);
+		}
 
 		CUBE_FLOWER = getDrawable(newColorPixmap(CUBE_SIZE, CUBE_SIZE, Color.LIGHT_GRAY));
 		CUBE_WALL = getDrawable(newWallImage(CUBE_SIZE));
@@ -172,7 +173,21 @@ public class Res {
 		Pixmap pixmap3 = new Pixmap(CUBE_SIZE, CUBE_SIZE, Format.RGBA8888);
 		pixmap3.setColor(color);
 		pixmap3.fillRectangle(CUBE_SIZE - CUBE_BORDER_WIDTH, 0, CUBE_SIZE, CUBE_SIZE);
-		return new Pixmap[] { pixmap0, pixmap1, pixmap2, pixmap3 };
+		Pixmap pixmap4 = new Pixmap(CUBE_SIZE, CUBE_SIZE, Format.RGBA8888);
+		pixmap4.setColor(color);
+		pixmap4.fillRectangle(0, 0, CUBE_BORDER_WIDTH, CUBE_BORDER_WIDTH);
+		Pixmap pixmap5 = new Pixmap(CUBE_SIZE, CUBE_SIZE, Format.RGBA8888);
+		pixmap5.setColor(color);
+		pixmap5.fillRectangle(CUBE_SIZE - CUBE_BORDER_WIDTH, CUBE_SIZE - CUBE_BORDER_WIDTH, CUBE_BORDER_WIDTH,
+				CUBE_BORDER_WIDTH);
+		Pixmap pixmap6 = new Pixmap(CUBE_SIZE, CUBE_SIZE, Format.RGBA8888);
+		pixmap6.setColor(color);
+		pixmap6.fillRectangle(0, CUBE_SIZE - CUBE_BORDER_WIDTH, CUBE_BORDER_WIDTH, CUBE_BORDER_WIDTH);
+		Pixmap pixmap7 = new Pixmap(CUBE_SIZE, CUBE_SIZE, Format.RGBA8888);
+		pixmap7.setColor(color);
+		pixmap7.fillRectangle(CUBE_SIZE - CUBE_BORDER_WIDTH, 0, CUBE_BORDER_WIDTH, CUBE_BORDER_WIDTH);
+		Pixmap pixmap8 = new Pixmap(CUBE_SIZE, CUBE_SIZE, Format.RGBA8888);
+		return new Pixmap[] { pixmap0, pixmap1, pixmap2, pixmap3, pixmap6, pixmap7, pixmap4, pixmap5 };
 	}
 
 	private static Pixmap newCursorPixmap() {

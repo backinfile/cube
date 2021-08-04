@@ -11,12 +11,12 @@ index=aa
 size=9*9
 map=
 WWWWWWWWW
-W      dW
+W     WWW
 W e1  WWW
 W       W
 WWW     W
 W       W
-W    W   
+W  R W   
 Wb   W  W
 WWWWWWWWW
 

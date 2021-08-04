@@ -17,12 +17,14 @@ import com.backinfile.cube.model.cubes.Human;
 import com.backinfile.cube.model.cubes.Key;
 import com.backinfile.cube.model.cubes.MapCube;
 import com.backinfile.cube.model.cubes.Wall;
+import com.backinfile.cube.support.ActionUtils;
 import com.backinfile.cube.support.TimerQueue;
 import com.backinfile.cube.support.Utils;
 import com.backinfile.cube.view.CubeView;
 import com.backinfile.cube.view.CubeViewGroup;
 import com.backinfile.cube.view.WorldStage;
 import com.badlogic.gdx.scenes.scene2d.Group;
+import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction;
 
 public class GameManager {
 	public static final GameManager instance = new GameManager();
@@ -35,9 +37,13 @@ public class GameManager {
 	private Human human;
 	private LinkedList<History> histories = new LinkedList<History>();
 	private Vector lastHumanMove = new Vector();
+	private float humanMoveToX;
+	private float humanMoveToY;
 
-	private static final int[] dx = new int[] { 0, 0, -1, 1 };
-	private static final int[] dy = new int[] { 1, -1, 0, 0 };
+	public static final int[] dx = new int[] { 0, 0, -1, 1 };
+	public static final int[] dy = new int[] { 1, -1, 0, 0 };
+	public static final int[] dx8 = new int[] { 0, 0, -1, 1, -1, 1, -1, 1 };
+	public static final int[] dy8 = new int[] { 1, -1, 0, 0, -1, 1, 1, -1 };
 
 	public void init() {
 		// 解析配置数据
@@ -105,7 +111,8 @@ public class GameManager {
 		int width = Res.CUBE_SIZE * curMap.width;
 		int height = Res.CUBE_SIZE * curMap.height;
 		mainView.setSize(width, height);
-		mainView.setPosition((worldStage.getWidth() - width) / 2, (worldStage.getHeight() - height) / 2);
+//		mainView.setPosition((worldStage.getWidth() - width) / 2, (worldStage.getHeight() - height) / 2);
+//		ActionUtils.moveTo(mainView, (worldStage.getWidth() - width) / 2, (worldStage.getHeight() - height) / 2);
 
 		// 先隐藏所有方块
 		for (MapData mapData : worldData.getMapDatas()) {
@@ -115,6 +122,9 @@ public class GameManager {
 		// 显示需要显示的方块
 		updateCubeGroupView(curWorldCoor, 0, 0, curMap.width * Res.CUBE_SIZE, curMap.height * Res.CUBE_SIZE, 1f, 0);
 		worldStage.updateCubeGroupLayer();
+
+		ActionUtils.moveTo(mainView, (worldStage.getWidth() / 2 - humanMoveToX),
+				(worldStage.getHeight() / 2 - humanMoveToY));
 	}
 
 	private void updateCubeGroupView(String coor, float x, float y, float width, float height, float alpha, int layer) {
@@ -124,29 +134,36 @@ public class GameManager {
 //		Log.game.info("show coor:{} x:{} y:{} width:{} height:{}", coor, x, y, width, height);
 		MapData mapData = worldData.getMapData(coor);
 		CubeViewGroup group = worldStage.getCubeGroup(coor);
-		group.setLayer(layer);
+		group.setLayer(layer - (alpha < 1f ? 1 : 0));
 		group.setSize(width, height);
-		group.setPosition(x, y);
+		ActionUtils.moveTo(group, x, y);
+		ActionUtils.sizeTo(group, width, height);
 		group.setVisible(true);
 		float cubeWidth = width / mapData.width;
 		float cubeHeight = height / mapData.height;
 		for (CubeView cubeView : worldStage.getCubeViews(coor)) {
 			Cube cube = cubeView.getCube();
-			cubeView.setPosition(cube.position.x * cubeWidth, cube.position.y * cubeHeight);
-			cubeView.setSize(cubeWidth, cubeHeight);
+			
+			Position lastPosition = cube.getLastPosition();
+			if (lastPosition != null && lastPosition.worldCoor != cube.position.worldCoor) {
+				cubeView.setPosition(cube.position.x * cubeWidth, cube.position.y * cubeHeight);
+			} else {
+				ActionUtils.moveTo(cubeView, cube.position.x * cubeWidth, cube.position.y * cubeHeight);
+			}
+			ActionUtils.sizeTo(cubeView, cubeWidth, cubeHeight);
 			cubeView.setAlpha(alpha);
 			if (cube instanceof MapCube) {
 				cubeView.setMainImageVisible(((MapCube) cube).isFitKey());
 				float nextAlpha = (alpha < 1f || cube instanceof Key) ? Res.FLOOR_ELE_ALPHA * alpha : 1f * alpha;
 				updateCubeGroupView(((MapCube) cube).getTargetCoor(), x + cube.position.x * cubeWidth,
-						y + cube.position.y * cubeHeight, cubeWidth, cubeHeight, nextAlpha, layer - 1);
+						y + cube.position.y * cubeHeight, cubeWidth, cubeHeight, nextAlpha, layer - 2);
 			} else if (cube instanceof Wall) {
 				List<Integer> adjWallDirections = getAdjWallDirections(cube.position);
-				for (int i = 0; i < 4; i++) {
-					cubeView.setAsideBorder(i, adjWallDirections.contains(i));
-				}
+				cubeView.setAdjWallDirections(adjWallDirections);
 			} else if (cube instanceof Human) {
 				cubeView.setHumanEyeOffset(lastHumanMove.x * cubeWidth / 10, lastHumanMove.y * cubeHeight / 10);
+				humanMoveToX = x + cube.position.x * cubeWidth;
+				humanMoveToY = y + cube.position.y * cubeHeight;
 			}
 		}
 
@@ -155,8 +172,8 @@ public class GameManager {
 	private List<Integer> getAdjWallDirections(Position position) {
 		List<Integer> directions = new ArrayList<Integer>();
 		MapData mapData = worldData.getMapData(position.worldCoor);
-		for (int i = 0; i < dx.length; i++) {
-			Position translated = position.getTranslated(dx[i], dy[i]);
+		for (int i = 0; i < dx8.length; i++) {
+			Position translated = position.getTranslated(dx8[i], dy8[i]);
 			if (mapData.cubeMap.inMap(translated.x, translated.y)) {
 				Cube sideCube = mapData.cubeMap.get(translated);
 				if (sideCube != null && sideCube instanceof Wall) {

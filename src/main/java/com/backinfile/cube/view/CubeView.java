@@ -1,11 +1,16 @@
 package com.backinfile.cube.view;
 
+import java.util.List;
+
+import com.backinfile.cube.Log;
 import com.backinfile.cube.Res;
+import com.backinfile.cube.controller.GameManager;
 import com.backinfile.cube.model.cubes.Cube;
 import com.backinfile.cube.model.cubes.Human;
 import com.backinfile.cube.model.cubes.MapCube;
 import com.backinfile.cube.model.cubes.Rock;
 import com.backinfile.cube.model.cubes.Wall;
+import com.backinfile.cube.support.Utils;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
@@ -31,13 +36,12 @@ public class CubeView extends Group {
 			addActor(borderImage);
 		} else if (cube instanceof Wall) {
 			mainImage = new Image(Res.CUBE_WALL);
-			borderAsideImages = new Image[] { new Image(Res.CUBE_BORDER_ASIDE[0]), new Image(Res.CUBE_BORDER_ASIDE[1]),
-					new Image(Res.CUBE_BORDER_ASIDE[2]), new Image(Res.CUBE_BORDER_ASIDE[3]), };
+			borderAsideImages = new Image[Res.CUBE_BORDER_ASIDE.length];
 			addActor(mainImage);
-			addActor(borderAsideImages[0]);
-			addActor(borderAsideImages[1]);
-			addActor(borderAsideImages[2]);
-			addActor(borderAsideImages[3]);
+			for (int i = 0; i < borderAsideImages.length; i++) {
+				borderAsideImages[i] = new Image(Res.CUBE_BORDER_ASIDE[i]);
+				addActor(borderAsideImages[i]);
+			}
 		} else if (cube instanceof Human) {
 			mainImage = new Image(Res.CUBE_HUMAN);
 			humanEyeImage = new Image(Res.CUBE_HUMAN_EYE);
@@ -58,8 +62,26 @@ public class CubeView extends Group {
 		borderAsideImages[index].setVisible(!open);
 	}
 
-	public void setWallBorder(boolean[] neighbor) {
-
+	public void setAdjWallDirections(List<Integer> adjWallDirections) {
+		for (int i = 0; i < borderAsideImages.length; i++) {
+			borderAsideImages[i].setVisible(true);
+		}
+		for (int dir : adjWallDirections) {
+			if (dir < 4) {
+				borderAsideImages[dir].setVisible(false);
+			}
+		}
+		for (int dir = 4; dir < 8; dir++) {
+			borderAsideImages[dir].setVisible(false);
+			if (!adjWallDirections.contains(dir)) {
+				int dir1 = Utils.indexOf(GameManager.dx, GameManager.dx8[dir]);
+				int dir2 = Utils.indexOf(GameManager.dy, GameManager.dy8[dir]);
+				if (adjWallDirections.contains(dir1) && adjWallDirections.contains(dir2)) {
+					borderAsideImages[dir].setVisible(true);
+//					Log.game.info("{} dir:{} adj:{}", cube, dir, adjWallDirections);
+				}
+			}
+		}
 	}
 
 	public void setHumanEyeOffset(float x, float y) {

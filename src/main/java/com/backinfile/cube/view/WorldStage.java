@@ -12,6 +12,7 @@ import com.backinfile.cube.Res;
 import com.backinfile.cube.controller.GameManager;
 import com.backinfile.cube.model.MapData;
 import com.backinfile.cube.model.cubes.Cube;
+import com.backinfile.cube.model.cubes.Human;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
@@ -139,6 +140,28 @@ public class WorldStage extends Stage {
 		if (visible) {
 			tipText.setText(content);
 		}
+	}
+
+	public CubeView getHumanCubeView() {
+		for (CubeView cubeView : getCubeViews()) {
+			if (cubeView.getCube() instanceof Human) {
+				return cubeView;
+			}
+		}
+		return null;
+	}
+
+	public CubeViewGroup getHumanCubeViewGroup() {
+		for (CubeViewGroup cubeViewGroup : viewGroups.values()) {
+			for (Actor actor : cubeViewGroup.getChildren()) {
+				if (actor instanceof CubeView) {
+					if (((CubeView) actor).getCube() instanceof Human) {
+						return cubeViewGroup;
+					}
+				}
+			}
+		}
+		return null;
 	}
 
 	@Override

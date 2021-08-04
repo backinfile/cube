@@ -14,11 +14,20 @@ WWWWWWWWW
 W      dW
 W     WWW
 W       W
-WWW     W
+WWW a   W
 W       W
 W    W   
 Wb   W  W
 WWWWWWWWW
+
+
+index=aaa
+size=3*3
+text=前进
+map=
+WWW
+  W
+WWW
 
 index=aab
 size=5*5

@@ -51,6 +51,10 @@ public class CubeView extends Group {
 	public void setAsideBorder(int index, boolean open) {
 		borderAsideImages[index].setVisible(!open);
 	}
+	
+	public void setWallBorder(boolean[] neighbor) {
+		
+	}
 
 	public void setHumanEyeOffset(float x, float y) {
 		if (humanEyeImage != null) {

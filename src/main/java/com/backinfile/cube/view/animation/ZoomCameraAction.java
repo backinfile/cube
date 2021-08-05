@@ -7,6 +7,8 @@ import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction;
 public class ZoomCameraAction extends TemporalAction {
 	private float startWidth, startHeight;
 	private float endWidth, endHeight;
+	private float startX, startY;
+	private float endX, endY;
 	private OrthographicCamera camera;
 
 	protected void begin() {
@@ -16,11 +18,15 @@ public class ZoomCameraAction extends TemporalAction {
 		}
 		startWidth = camera.viewportWidth;
 		startHeight = camera.viewportHeight;
+		startX = camera.position.x;
+		startY = camera.position.y;
 	}
 
 	protected void update(float percent) {
 		camera.viewportWidth = startWidth + (endWidth - startWidth) * percent;
 		camera.viewportHeight = startHeight + (endHeight - startHeight) * percent;
+		camera.position.x = startX + (endX - startX) * percent;
+		camera.position.y = startY + (endY - startY) * percent;
 		camera.update();
 		target.getStage().getBatch().setProjectionMatrix(camera.combined);
 	}
@@ -29,9 +35,14 @@ public class ZoomCameraAction extends TemporalAction {
 		super.reset();
 	}
 
-	public void setEnd(float width, float height) {
+	public void setEndSize(float width, float height) {
 		this.endWidth = width;
 		this.endHeight = height;
+	}
+
+	public void setEndPos(float x, float y) {
+		this.endX = x;
+		this.endY = y;
 	}
 
 }

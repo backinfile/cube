@@ -117,14 +117,6 @@ public class CubeView extends Group {
 	}
 
 	@Override
-	public void addAction(Action action) {
-		super.addAction(action);
-		if (cube instanceof Human) {
-			Log.game.info("{}", action);
-		}
-	}
-
-	@Override
 	public void act(float delta) {
 		super.act(delta);
 	}

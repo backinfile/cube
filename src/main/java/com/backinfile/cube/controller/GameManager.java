@@ -28,7 +28,7 @@ public class GameManager {
 	public WorldStage worldStage;
 	public TimerQueue timerQueue;
 
-	private Human human;
+	public Human human;
 	private LinkedList<History> histories = new LinkedList<History>();
 	public Vector lastHumanMove = new Vector();
 	public boolean enableController = true;

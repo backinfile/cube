@@ -1,19 +1,25 @@
 package com.backinfile.cube.controller;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.backinfile.cube.Log;
 import com.backinfile.cube.Res;
+import com.backinfile.cube.model.History;
 import com.backinfile.cube.model.MapData;
 import com.backinfile.cube.model.Movements;
 import com.backinfile.cube.model.Vector;
 import com.backinfile.cube.model.WorldData;
+import com.backinfile.cube.model.History.Movement;
 import com.backinfile.cube.model.cubes.Cube;
 import com.backinfile.cube.model.cubes.Human;
 import com.backinfile.cube.model.cubes.Key;
 import com.backinfile.cube.model.cubes.MapCube;
 import com.backinfile.cube.model.cubes.Wall;
+import com.backinfile.cube.support.ActionUtils;
+import com.backinfile.cube.support.Time2;
 import com.backinfile.cube.view.CubeView;
 import com.backinfile.cube.view.CubeViewGroup;
 import com.backinfile.cube.view.WorldStage;
@@ -22,10 +28,51 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 public class GameViewManager {
 	public static final GameViewManager instance = new GameViewManager();
 
-	private List<String> visiableMapCoor = new ArrayList<>();
+	private static final float MainViewScale = 1.2f;
+	private static final float ANI_DURATION = 0.1f;
+	private Set<CubeView> lastInView = new HashSet<>();
+
+	public void updateCubeView(History history) {
+		if (history != null) {
+			adjustCubeViewOwnGroup(history);
+		}
+		WorldStage worldStage = GameManager.instance.worldStage;
+
+		// 先通过动画移动到确定位置
+		for (Movement movement : history.getMovements()) {
+			Cube cube = movement.cube;
+			CubeViewGroup cubeGroup = worldStage.getCubeGroup(cube.position.worldCoor);
+			float cubeWidth = cubeGroup.getWidth() / cubeGroup.getMapData().width;
+			float cubeHeight = cubeGroup.getHeight() / cubeGroup.getMapData().height;
+			float targetX = cube.position.x * cubeWidth + cubeGroup.getSavePos().x;
+			float targetY = cube.position.y * cubeHeight + cubeGroup.getSavePos().y;
+
+			CubeView cubeView = cubeGroup.getCubeView(cube);
+			ActionUtils.moveTo(cubeView, targetX, targetY, ANI_DURATION);
+			ActionUtils.sizeTo(cubeView, cubeWidth, cubeHeight, ANI_DURATION);
+			Log.game.info("{} {},{} {},{}", cube, targetX, targetY, cubeWidth, cubeHeight);
+
+			// 任务移动动画
+			if (cube instanceof Human) {
+				cubeView.setHumanEyeOffset(GameManager.instance.lastHumanMove.x * cubeWidth / 10,
+						GameManager.instance.lastHumanMove.y * cubeHeight / 10, ANI_DURATION);
+			}
+		}
+
+		// 然后控制相机缩放
+
+		// 结束后，悄悄替换场景
+
+		GameManager.instance.enableController = false;
+		GameManager.instance.timerQueue.applyTimer((long) (ANI_DURATION * Time2.SEC), () -> {
+			GameManager.instance.enableController = true;
+			staticSetView();
+			Log.game.info("done");
+		});
+	}
 
 	public void staticSetView() {
-		visiableMapCoor.clear();
+		lastInView.clear();
 		WorldData worldData = GameManager.instance.worldData;
 		WorldStage worldStage = GameManager.instance.worldStage;
 		MapData curMapData = worldData.getHumanMapData();
@@ -65,8 +112,9 @@ public class GameViewManager {
 		Vector savePos = cubeGroup.getSavePos();
 		if (worldStage.getCamera() instanceof OrthographicCamera) {
 			OrthographicCamera camera = (OrthographicCamera) worldStage.getCamera();
-			camera.setToOrtho(false, cubeGroup.getWidth() / worldStage.getHeight() * worldStage.getWidth(),
-					cubeGroup.getHeight());
+			camera.setToOrtho(false,
+					cubeGroup.getWidth() * MainViewScale * (worldStage.getWidth() / worldStage.getHeight()),
+					cubeGroup.getHeight() * MainViewScale);
 			camera.position.set(savePos.x + cubeGroup.getWidth() / 2, savePos.y + cubeGroup.getHeight() / 2, 0);
 			Log.game.info("{}, {}, {}", camera.position, camera.viewportWidth, camera.viewportHeight);
 			camera.update();
@@ -91,6 +139,7 @@ public class GameViewManager {
 		float cubeWidth = width / mapData.width;
 		float cubeHeight = height / mapData.height;
 		for (CubeView cubeView : worldStage.getCubeViews(coor)) {
+			lastInView.add(cubeView);
 			Cube cube = cubeView.getCube();
 			float targetX = cube.position.x * cubeWidth + x;
 			float targetY = cube.position.y * cubeHeight + y;
@@ -109,14 +158,24 @@ public class GameViewManager {
 				cubeView.setAdjWallDirections(adjWallDirections);
 			} else if (cube instanceof Human) {
 				cubeView.setHumanEyeOffset(GameManager.instance.lastHumanMove.x * cubeWidth / 10,
-						GameManager.instance.lastHumanMove.y * cubeHeight / 10);
-				cubeView.setSize(cubeWidth, cubeHeight);
+						GameManager.instance.lastHumanMove.y * cubeHeight / 10, 0);
 			}
 		}
 	}
 
-	public void doMoveCubes(Movements movements) {
+	public void dealMoveCubes(Movements movements) {
 
+	}
+
+	private void adjustCubeViewOwnGroup(History history) {
+		WorldStage worldStage = GameManager.instance.worldStage;
+		// 调整方块到合适的group
+		for (Movement movement : history.getMovements()) {
+			if (!movement.position.worldCoor.equals(movement.cube.position.worldCoor)) {
+				CubeView cubeView = worldStage.removeCubeView(movement.position.worldCoor, movement.cube);
+				worldStage.addCubeView(movement.cube.position.worldCoor, cubeView);
+			}
+		}
 	}
 
 	public void moveCameraAuto() {

@@ -1,5 +1,6 @@
 package com.backinfile.cube.controller;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
 
@@ -13,6 +14,10 @@ public class GamePlayInputProcessor implements InputProcessor {
 
 	@Override
 	public boolean keyDown(int keycode) {
+		if (!gameManager.enableController) {
+			return false;
+		}
+
 		switch (keycode) {
 		case Keys.UP:
 		case Keys.W:
@@ -35,6 +40,9 @@ public class GamePlayInputProcessor implements InputProcessor {
 			break;
 		case Keys.Z:
 			gameManager.undo();
+			break;
+		case Keys.ESCAPE:
+			Gdx.app.exit();
 			break;
 		default:
 			break;

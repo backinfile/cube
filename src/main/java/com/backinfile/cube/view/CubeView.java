@@ -85,10 +85,10 @@ public class CubeView extends Group {
 		}
 	}
 
-	public void setHumanEyeOffset(float x, float y) {
+	public void setHumanEyeOffset(float x, float y, float duration) {
 		if (humanEyeImage != null) {
 			MoveToAction moveToAction = new MoveToAction();
-			moveToAction.setDuration(0.06f);
+			moveToAction.setDuration(duration);
 			moveToAction.setPosition(x, y);
 			humanEyeImage.addAction(moveToAction);
 		}

@@ -1,6 +1,5 @@
 package com.backinfile.cube.model;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;

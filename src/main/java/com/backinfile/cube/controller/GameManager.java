@@ -1,10 +1,8 @@
 package com.backinfile.cube.controller;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 import com.backinfile.cube.Log;
 import com.backinfile.cube.Res;
@@ -19,15 +17,9 @@ import com.backinfile.cube.model.cubes.Human;
 import com.backinfile.cube.model.cubes.Key;
 import com.backinfile.cube.model.cubes.MapCube;
 import com.backinfile.cube.model.cubes.Wall;
-import com.backinfile.cube.support.ActionUtils;
 import com.backinfile.cube.support.TimerQueue;
 import com.backinfile.cube.support.Utils;
-import com.backinfile.cube.view.CubeView;
-import com.backinfile.cube.view.CubeViewGroup;
 import com.backinfile.cube.view.WorldStage;
-import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.Group;
-import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction;
 
 public class GameManager {
 	public static final GameManager instance = new GameManager();
@@ -36,11 +28,10 @@ public class GameManager {
 	public WorldStage worldStage;
 	public TimerQueue timerQueue;
 
-	public String curWorldCoor;
 	private Human human;
 	private LinkedList<History> histories = new LinkedList<History>();
 	public Vector lastHumanMove = new Vector();
-	private Set<Actor> viewLast = new HashSet<>();
+	public boolean enableController = true;
 
 	public static final int[] dx = new int[] { 0, 0, -1, 1 };
 	public static final int[] dy = new int[] { 1, -1, 0, 0 };
@@ -53,7 +44,6 @@ public class GameManager {
 
 		// 初始化human位置
 		MapData firstMapData = worldData.getHumanMapData();
-		curWorldCoor = "";
 		for (Cube cube : firstMapData.cubeMap.getUnitList()) {
 			if (cube instanceof Human) {
 				human = (Human) cube;
@@ -78,22 +68,8 @@ public class GameManager {
 	}
 
 	public Vector getWorldPixelSize() {
-		MapData curMapData = getCurMap();
+		MapData curMapData = worldData.getHumanMapData();
 		return new Vector(Res.CUBE_SIZE * curMapData.width, Res.CUBE_SIZE * curMapData.height);
-	}
-
-	private void adjustCubeViewOwnGroup(History history) {
-		// 调整方块到合适的group
-		for (Movement movement : history.getMovements()) {
-			if (!movement.position.worldCoor.equals(movement.cube.position.worldCoor)) {
-				CubeView cubeView = worldStage.removeCubeView(movement.position.worldCoor, movement.cube);
-				worldStage.addCubeView(movement.cube.position.worldCoor, cubeView);
-			}
-		}
-	}
-
-	public void updateGameView() {
-		GameViewManager.instance.staticSetView();
 	}
 
 	public List<Integer> getAdjWallDirections(Position position) {
@@ -109,10 +85,6 @@ public class GameManager {
 			}
 		}
 		return directions;
-	}
-
-	public MapData getCurMap() {
-		return worldData.getMapData(curWorldCoor);
 	}
 
 	public void moveHuman(int dura) {
@@ -163,8 +135,7 @@ public class GameManager {
 		checkFitKey();
 
 		// 刷新界面
-		adjustCubeViewOwnGroup(history);
-		updateGameView();
+		GameViewManager.instance.updateCubeView(history);
 	}
 
 	private boolean testCubeMove(Position startPosition, Vector d) {

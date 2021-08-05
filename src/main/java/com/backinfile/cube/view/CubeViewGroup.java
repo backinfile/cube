@@ -2,6 +2,8 @@ package com.backinfile.cube.view;
 
 import com.backinfile.cube.model.MapData;
 import com.backinfile.cube.model.Vector;
+import com.backinfile.cube.model.cubes.Cube;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 
 public class CubeViewGroup extends Group {
@@ -29,5 +31,21 @@ public class CubeViewGroup extends Group {
 
 	public int getLayer() {
 		return layer;
+	}
+
+	public MapData getMapData() {
+		return mapData;
+	}
+
+	public CubeView getCubeView(Cube cube) {
+		for (Actor actor : getChildren()) {
+			if (actor instanceof CubeView) {
+				CubeView cubeView = (CubeView) actor;
+				if (cubeView.getCube() == cube) {
+					return (CubeView) actor;
+				}
+			}
+		}
+		return null;
 	}
 }

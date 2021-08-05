@@ -3,6 +3,7 @@ package com.backinfile.cube.view;
 import com.backinfile.cube.Settings;
 import com.backinfile.cube.controller.GameManager;
 import com.backinfile.cube.controller.GamePlayInputProcessor;
+import com.backinfile.cube.controller.GameViewManager;
 import com.backinfile.cube.support.TimerQueue;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
@@ -24,8 +25,8 @@ public class GameScreen implements Screen {
 			worldStage = new WorldStage(new ExtendViewport(Settings.SCREEN_WIDTH, Settings.SCREEN_HEIGHT));
 			Gdx.input.setInputProcessor(new GamePlayInputProcessor(GameManager.instance));
 			GameManager.instance.worldStage = worldStage;
-			GameManager.instance.timerQueue.applyTimer(10, () -> {
-				GameManager.instance.updateGameView();
+			GameManager.instance.timerQueue.applyTimer(0, () -> {
+				GameViewManager.instance.staticSetView();
 			});
 		}
 

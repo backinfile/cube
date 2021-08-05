@@ -1,5 +1,6 @@
 package com.backinfile.cube.model;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -46,26 +47,6 @@ public class WorldData {
 			}
 		}
 		Log.game.error("search coor:{} not exist!", coor);
-		return null;
-	}
-
-	public MapData getNextMapData(MapData mapData, String t) {
-		String target = mapData.coor + t;
-		for (MapData data : datas) {
-			if (data.coor.equals(target)) {
-				return data;
-			}
-		}
-		return null;
-	}
-
-	public MapData getPreMapData(MapData mapData) {
-		String target = mapData.coor.substring(0, mapData.coor.length() - 1);
-		for (MapData data : datas) {
-			if (data.coor.equals(target)) {
-				return data;
-			}
-		}
 		return null;
 	}
 
@@ -145,7 +126,25 @@ public class WorldData {
 		if (curMapData != null) {
 			world.datas.add(curMapData);
 		}
+		world.setupRely();
 		return world;
+	}
+
+	private void setupRely() {
+		for (MapData mapData : datas) {
+			for (Cube cube : mapData.cubeMap.getUnitList()) {
+				if (cube instanceof MapCube) {
+					MapCube mapCube = (MapCube) cube;
+					MapData targetMapData = getMapData(mapCube.getTargetCoor());
+					if (targetMapData == null) {
+						Log.game.warn("map data missing coor:{}", mapCube.getTargetCoor());
+						continue;
+					}
+					targetMapData.preCube = mapCube;
+					targetMapData.preMapData = mapData;
+				}
+			}
+		}
 	}
 
 	public static WorldData parseFromTiled(String conf) {

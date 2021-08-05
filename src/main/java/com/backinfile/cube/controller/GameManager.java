@@ -39,7 +39,7 @@ public class GameManager {
 	public String curWorldCoor;
 	private Human human;
 	private LinkedList<History> histories = new LinkedList<History>();
-	private Vector lastHumanMove = new Vector();
+	public Vector lastHumanMove = new Vector();
 	private Set<Actor> viewLast = new HashSet<>();
 
 	public static final int[] dx = new int[] { 0, 0, -1, 1 };
@@ -185,7 +185,7 @@ public class GameManager {
 
 	}
 
-	private List<Integer> getAdjWallDirections(Position position) {
+	public List<Integer> getAdjWallDirections(Position position) {
 		List<Integer> directions = new ArrayList<Integer>();
 		MapData mapData = worldData.getMapData(position.worldCoor);
 		for (int i = 0; i < dx8.length; i++) {

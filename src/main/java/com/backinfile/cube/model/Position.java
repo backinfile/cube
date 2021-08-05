@@ -41,8 +41,8 @@ public class Position {
 	}
 
 	public void setPosition(Vector vector) {
-		this.x = vector.x;
-		this.y = vector.y;
+		this.x = (int) vector.x;
+		this.y = (int) vector.y;
 	}
 
 	public void move(Vector vector) {
@@ -51,7 +51,7 @@ public class Position {
 	}
 
 	public Position getTranslated(Vector vector) {
-		return new Position(x + vector.x, y + vector.y, worldCoor);
+		return new Position(x + (int) vector.x, y + (int) vector.y, worldCoor);
 	}
 
 	public Position getTranslated(int x, int y) {

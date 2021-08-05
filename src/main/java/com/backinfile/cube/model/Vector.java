@@ -3,18 +3,18 @@ package com.backinfile.cube.model;
 import java.util.Objects;
 
 public class Vector {
-	public int x = 0;
-	public int y = 0;
+	public float x = 0;
+	public float y = 0;
 
 	public Vector() {
 	}
 
-	public Vector(int x, int y) {
+	public Vector(float x, float y) {
 		this.x = x;
 		this.y = y;
 	}
 
-	public void set(int x, int y) {
+	public void set(float x, float y) {
 		this.x = x;
 		this.y = y;
 	}

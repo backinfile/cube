@@ -2,6 +2,7 @@ package com.backinfile.cube.model;
 
 import com.backinfile.cube.model.cubes.Cube;
 import com.backinfile.cube.model.cubes.Human;
+import com.backinfile.cube.model.cubes.MapCube;
 import com.backinfile.cube.model.cubes.Wall;
 
 public class MapData {
@@ -11,6 +12,8 @@ public class MapData {
 	public MMap<Cube> cubeMap; // 方块
 	public String view = "";
 	public String tipText = "";
+	public MapCube preCube = null;
+	public MapData preMapData = null;
 
 	public void initMap(int width, int height) {
 		this.width = width;

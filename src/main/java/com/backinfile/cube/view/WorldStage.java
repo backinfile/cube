@@ -71,7 +71,8 @@ public class WorldStage extends Stage {
 	}
 
 	public CubeViewGroup getCubeGroup(String coor) {
-		return viewGroups.computeIfAbsent(coor, key -> new CubeViewGroup());
+		return viewGroups.computeIfAbsent(coor,
+				key -> new CubeViewGroup(GameManager.instance.worldData.getMapData(key)));
 	}
 
 	public CubeView removeCubeView(String coor, Cube cube) {

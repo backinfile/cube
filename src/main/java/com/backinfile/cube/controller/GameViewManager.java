@@ -23,13 +23,14 @@ import com.backinfile.cube.support.Time2;
 import com.backinfile.cube.view.CubeView;
 import com.backinfile.cube.view.CubeViewGroup;
 import com.backinfile.cube.view.WorldStage;
+import com.backinfile.cube.view.animation.ZoomCameraAction;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 
 public class GameViewManager {
 	public static final GameViewManager instance = new GameViewManager();
 
 	private static final float MainViewScale = 1.2f;
-	private static final float ANI_DURATION = 0.1f;
+	private static final float ANI_DURATION = 0.3f;
 	private Set<CubeView> lastInView = new HashSet<>();
 
 	public void updateCubeView(History history) {
@@ -60,6 +61,15 @@ public class GameViewManager {
 		}
 
 		// 然后控制相机缩放
+		CubeViewGroup cubeGroup = worldStage.getHumanCubeViewGroup();
+		ZoomCameraAction action = new ZoomCameraAction();
+		action.setDuration(ANI_DURATION);
+		action.setEnd(cubeGroup.getWidth() * MainViewScale * (worldStage.getWidth() / worldStage.getHeight()),
+				cubeGroup.getHeight() * MainViewScale);
+		cubeGroup.addAction(action);
+		Log.game.info("camera:{},{}",
+				cubeGroup.getWidth() * MainViewScale * (worldStage.getWidth() / worldStage.getHeight()),
+				cubeGroup.getHeight() * MainViewScale);
 
 		// 结束后，悄悄替换场景
 
@@ -119,6 +129,9 @@ public class GameViewManager {
 			Log.game.info("{}, {}, {}", camera.position, camera.viewportWidth, camera.viewportHeight);
 			camera.update();
 			worldStage.getBatch().setProjectionMatrix(camera.combined);
+			Log.game.info("true camera:{},{}",
+					cubeGroup.getWidth() * MainViewScale * (worldStage.getWidth() / worldStage.getHeight()),
+					cubeGroup.getHeight() * MainViewScale);
 		}
 	}
 

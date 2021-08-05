@@ -12,15 +12,17 @@ public class ZoomCameraAction extends TemporalAction {
 	protected void begin() {
 		Camera cam = target.getStage().getCamera();
 		if (cam instanceof OrthographicCamera) {
-			OrthographicCamera camera = (OrthographicCamera) cam;
+			camera = (OrthographicCamera) cam;
 		}
 		startWidth = camera.viewportWidth;
 		startHeight = camera.viewportHeight;
 	}
 
 	protected void update(float percent) {
-		camera.setToOrtho(false, startWidth + (endWidth - startWidth) * percent,
-				startHeight + (endHeight - startHeight) * percent);
+		camera.viewportWidth = startWidth + (endWidth - startWidth) * percent;
+		camera.viewportHeight = startHeight + (endHeight - startHeight) * percent;
+		camera.update();
+		target.getStage().getBatch().setProjectionMatrix(camera.combined);
 	}
 
 	public void reset() {

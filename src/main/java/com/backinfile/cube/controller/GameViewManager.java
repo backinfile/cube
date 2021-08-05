@@ -3,10 +3,10 @@ package com.backinfile.cube.controller;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.backinfile.cube.Log;
 import com.backinfile.cube.Res;
 import com.backinfile.cube.model.MapData;
 import com.backinfile.cube.model.Movements;
-import com.backinfile.cube.model.Position;
 import com.backinfile.cube.model.Vector;
 import com.backinfile.cube.model.WorldData;
 import com.backinfile.cube.model.cubes.Cube;
@@ -14,11 +14,9 @@ import com.backinfile.cube.model.cubes.Human;
 import com.backinfile.cube.model.cubes.Key;
 import com.backinfile.cube.model.cubes.MapCube;
 import com.backinfile.cube.model.cubes.Wall;
-import com.backinfile.cube.support.ActionUtils;
 import com.backinfile.cube.view.CubeView;
 import com.backinfile.cube.view.CubeViewGroup;
 import com.backinfile.cube.view.WorldStage;
-import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 
 public class GameViewManager {
@@ -67,8 +65,12 @@ public class GameViewManager {
 		Vector savePos = cubeGroup.getSavePos();
 		if (worldStage.getCamera() instanceof OrthographicCamera) {
 			OrthographicCamera camera = (OrthographicCamera) worldStage.getCamera();
-			camera.position.set(savePos.x, savePos.y, 0);
-
+			camera.setToOrtho(false, cubeGroup.getWidth() / worldStage.getHeight() * worldStage.getWidth(),
+					cubeGroup.getHeight());
+			camera.position.set(savePos.x + cubeGroup.getWidth() / 2, savePos.y + cubeGroup.getHeight() / 2, 0);
+			Log.game.info("{}, {}, {}", camera.position, camera.viewportWidth, camera.viewportHeight);
+			camera.update();
+			worldStage.getBatch().setProjectionMatrix(camera.combined);
 		}
 	}
 

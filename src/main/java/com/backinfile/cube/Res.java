@@ -20,7 +20,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 
 @SuppressWarnings("unused")
 public class Res {
-	public static final int CUBE_SIZE = Settings.SCREEN_HEIGHT / 12;
+	public static final int CUBE_SIZE = Settings.SCREEN_HEIGHT / 6;
 	public static final int CUBE_BORDER_WIDTH = CUBE_SIZE * 5 / 50;
 	public static final int CUBE_BORDER_WIDTH_THIN = 1;
 	public static final float FLOOR_ELE_ALPHA = 0.3f;
@@ -66,8 +66,9 @@ public class Res {
 	}
 
 	private static TextureRegionDrawable getDrawable(Pixmap pixmap) {
-		TextureRegion region = new TextureRegion(new Texture(pixmap));
-//		pixmap.dispose();
+		Texture texture = new Texture(pixmap, true);
+		TextureRegion region = new TextureRegion(texture);
+		pixmap.dispose();
 		return new TextureRegionDrawable(region);
 	}
 

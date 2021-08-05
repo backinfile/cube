@@ -12,6 +12,7 @@ import com.backinfile.cube.model.cubes.Rock;
 import com.backinfile.cube.model.cubes.Wall;
 import com.backinfile.cube.support.Utils;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction;
@@ -113,6 +114,14 @@ public class CubeView extends Group {
 
 	public void setMainImageVisible(boolean visible) {
 		mainImage.setVisible(visible);
+	}
+
+	@Override
+	public void addAction(Action action) {
+		super.addAction(action);
+		if (cube instanceof Human) {
+			Log.game.info("{}", action);
+		}
 	}
 
 	@Override

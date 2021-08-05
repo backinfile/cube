@@ -40,8 +40,6 @@ public class GameManager {
 	private Human human;
 	private LinkedList<History> histories = new LinkedList<History>();
 	private Vector lastHumanMove = new Vector();
-	private float humanMoveToX;
-	private float humanMoveToY;
 	private Set<Actor> viewLast = new HashSet<>();
 
 	public static final int[] dx = new int[] { 0, 0, -1, 1 };
@@ -115,7 +113,7 @@ public class GameManager {
 		int width = Res.CUBE_SIZE * curMap.width;
 		int height = Res.CUBE_SIZE * curMap.height;
 		mainView.setSize(width, height);
-//		mainView.setPosition((worldStage.getWidth() - width) / 2, (worldStage.getHeight() - height) / 2);
+		mainView.setPosition((worldStage.getWidth() - width) / 2, (worldStage.getHeight() - height) / 2);
 //		ActionUtils.moveTo(mainView, (worldStage.getWidth() - width) / 2, (worldStage.getHeight() - height) / 2);
 
 		// 记录上次已经显示的
@@ -140,17 +138,6 @@ public class GameManager {
 		// 显示需要显示的方块
 		updateCubeGroupView(curWorldCoor, 0, 0, curMap.width * Res.CUBE_SIZE, curMap.height * Res.CUBE_SIZE, 1f, 0);
 		worldStage.updateCubeGroupLayer();
-
-		Position lastPosition = human.getLastPosition();
-		if (lastPosition != null && lastPosition.worldCoor.equals(human.position.worldCoor)) {
-			ActionUtils.moveTo(mainView, (worldStage.getWidth() / 2 - humanMoveToX),
-					(worldStage.getHeight() / 2 - humanMoveToY), 0.3f);
-		} else {
-			mainView.setPosition((worldStage.getWidth() / 2 - humanMoveToX),
-					(worldStage.getHeight() / 2 - humanMoveToY));
-			Log.game.info("humanMoveTo:{} {},{}  {},{}", human.position.worldCoor, humanMoveToX, humanMoveToY,
-					(worldStage.getWidth() / 2 - humanMoveToX), (worldStage.getHeight() / 2 - humanMoveToY));
-		}
 	}
 
 	private void updateCubeGroupView(String coor, float x, float y, float width, float height, float alpha, int layer) {
@@ -161,25 +148,19 @@ public class GameManager {
 		MapData mapData = worldData.getMapData(coor);
 		CubeViewGroup group = worldStage.getCubeGroup(coor);
 		group.setLayer(layer - (alpha < 1f ? 1 : 0));
-		group.setSize(width, height);
-		if (viewLast.contains(group)) {
-			ActionUtils.moveTo(group, x, y);
-			ActionUtils.sizeTo(group, width, height);
-		} else {
-			group.setPosition(x, y);
-			group.setSize(width, height);
-		}
 		group.setVisible(true);
 		float cubeWidth = width / mapData.width;
 		float cubeHeight = height / mapData.height;
 		for (CubeView cubeView : worldStage.getCubeViews(coor)) {
 			Cube cube = cubeView.getCube();
+			float targetX = cube.position.x * cubeWidth + x;
+			float targetY = cube.position.y * cubeHeight + y;
 
 			Position lastPosition = cube.getLastPosition();
-			if ((lastPosition != null && lastPosition.worldCoor != cube.position.worldCoor)) {
-				cubeView.setPosition(cube.position.x * cubeWidth, cube.position.y * cubeHeight);
+			if (!(cube instanceof Human) && (lastPosition != null && !lastPosition.worldCoor.equals(cube.position.worldCoor))) {
+				cubeView.setPosition(targetX, targetY);
 			} else {
-				ActionUtils.moveTo(cubeView, cube.position.x * cubeWidth, cube.position.y * cubeHeight);
+				ActionUtils.moveTo(cubeView, targetX, targetY);
 			}
 
 			if (viewLast.contains(cubeView)) {
@@ -198,8 +179,6 @@ public class GameManager {
 				cubeView.setAdjWallDirections(adjWallDirections);
 			} else if (cube instanceof Human) {
 				cubeView.setHumanEyeOffset(lastHumanMove.x * cubeWidth / 10, lastHumanMove.y * cubeHeight / 10);
-				humanMoveToX = x + cube.position.x * cubeWidth;
-				humanMoveToY = y + cube.position.y * cubeHeight;
 				cubeView.setSize(cubeWidth, cubeHeight);
 			}
 		}

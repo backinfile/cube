@@ -7,6 +7,7 @@ import com.backinfile.cube.Res;
 import com.backinfile.cube.model.MapData;
 import com.backinfile.cube.model.Movements;
 import com.backinfile.cube.model.Position;
+import com.backinfile.cube.model.Vector;
 import com.backinfile.cube.model.WorldData;
 import com.backinfile.cube.model.cubes.Cube;
 import com.backinfile.cube.model.cubes.Human;
@@ -17,6 +18,8 @@ import com.backinfile.cube.support.ActionUtils;
 import com.backinfile.cube.view.CubeView;
 import com.backinfile.cube.view.CubeViewGroup;
 import com.backinfile.cube.view.WorldStage;
+import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 
 public class GameViewManager {
 	public static final GameViewManager instance = new GameViewManager();
@@ -28,6 +31,8 @@ public class GameViewManager {
 		WorldData worldData = GameManager.instance.worldData;
 		WorldStage worldStage = GameManager.instance.worldStage;
 		MapData curMapData = worldData.getHumanMapData();
+
+		worldStage.setTipText(false, "");
 
 		// 重置group
 		for (MapData mapData : worldData.getMapDatas()) {
@@ -58,6 +63,13 @@ public class GameViewManager {
 		worldStage.updateCubeGroupLayer();
 
 		// 调整摄像机
+		CubeViewGroup cubeGroup = worldStage.getCubeGroup(curMapData.coor);
+		Vector savePos = cubeGroup.getSavePos();
+		if (worldStage.getCamera() instanceof OrthographicCamera) {
+			OrthographicCamera camera = (OrthographicCamera) worldStage.getCamera();
+			camera.position.set(savePos.x, savePos.y, 0);
+
+		}
 	}
 
 	private void staticSetView(String coor, float x, float y, float width, float height, float alpha, int layer) {

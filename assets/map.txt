@@ -13,10 +13,10 @@ map=
 WWWWWWWWW
 W     WWW
 W e1  WWW
-W       W
-WWW     W
-W       W
-W  R W   
+W        
+WWW      
+W        
+W  R W  W
 Wb   W  W
 WWWWWWWWW
 

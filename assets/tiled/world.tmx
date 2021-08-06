@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.5" tiledversion="1.7.1" orientation="orthogonal" renderorder="left-down" width="11" height="11" tilewidth="32" tileheight="32" infinite="0" nextlayerid="4" nextobjectid="1">
+ <editorsettings>
+  <export format="json"/>
+ </editorsettings>
+ <tileset firstgid="1" source="../../../../../Documents/tiled/cubes.tsx"/>
+ <tileset firstgid="5" source="../../../../../Documents/tiled/cubes.tsx"/>
+ <layer id="1" name="cube" width="11" height="11">
+  <properties>
+   <property name="mapcube" value="2,3,home"/>
+  </properties>
+  <data encoding="csv">
+1,1,1,1,1,1,1,1,1,1,1,
+1,0,0,0,0,0,0,0,0,0,1,
+1,0,0,0,0,0,0,0,0,0,1,
+1,0,4,1,2,0,0,0,0,0,1,
+1,0,0,0,0,0,0,0,0,0,1,
+1,0,1,0,0,3,0,0,0,0,1,
+1,0,0,2,0,0,0,0,0,0,1,
+1,0,0,2,0,0,0,0,0,0,1,
+1,0,0,0,0,0,0,0,0,0,1,
+1,0,0,0,0,0,0,0,0,0,1,
+1,1,1,1,1,1,1,1,1,1,1
+</data>
+ </layer>
+ <layer id="2" name="home" width="11" height="11" visible="0">
+  <properties>
+   <property name="size" value="7,7"/>
+  </properties>
+  <data encoding="csv">
+1,1,0,0,0,1,1,0,0,0,0,
+1,1,0,0,0,1,1,0,0,0,0,
+1,1,0,0,0,1,1,0,0,0,0,
+1,1,0,0,0,1,1,0,0,0,0,
+1,1,0,0,0,1,1,0,0,0,0,
+1,1,1,1,1,1,1,0,0,0,0,
+1,1,1,1,1,1,1,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0
+</data>
+ </layer>
+</map>

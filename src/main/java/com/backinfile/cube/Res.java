@@ -62,7 +62,9 @@ public class Res {
 		initText();
 		initFont();
 
-		saveImagesToFile();
+		if (Settings.DEV) {
+			saveImagesToFile();
+		}
 	}
 
 	private static TextureRegionDrawable getDrawable(Pixmap pixmap) {
@@ -73,7 +75,8 @@ public class Res {
 	}
 
 	private static void initText() {
-		DefaultWorldConfString = getDefaultWorldConf();
+		DefaultWorldConfString = Gdx.files.internal("map.txt").readString();
+		DefaultWorldConfStringByTiled = Gdx.files.internal("tiled/world.json").readString();
 	}
 
 	private static void initImage() {
@@ -86,7 +89,7 @@ public class Res {
 		TEX_BLUE = getDrawable(newColorPixmap(8, 8, Color.BLUE));
 
 		CUBE_BORDER_BLACK = getDrawable(newBorderImage(Color.BLACK));
-		CUBE_BORDER_WHITE = getDrawable(newBorderImage(Color.WHITE));
+		CUBE_BORDER_WHITE = getDrawable(newWhiteBorderImage());
 		CUBE_BORDER_DARK = getDrawable(newBorderImage(Color.DARK_GRAY));
 		CUBE_BORDER_BLUE = getDrawable(newBorderImage(new Color(0, 0, 1f, 0.5f)));
 		Pixmap[] newBorderAsideImage = newBorderAsideImage(Color.BLACK);
@@ -151,6 +154,13 @@ public class Res {
 		pixmap.setColor(new Color(0.8f, 0.1f, 0.1f, 1f));
 		pixmap.fillRectangle(CUBE_BORDER_WIDTH_THIN, CUBE_BORDER_WIDTH_THIN, CUBE_SIZE - CUBE_BORDER_WIDTH_THIN * 2,
 				CUBE_SIZE - CUBE_BORDER_WIDTH_THIN * 2);
+		return pixmap;
+	}
+
+	private static Pixmap newWhiteBorderImage() {
+		Pixmap pixmap = new Pixmap(CUBE_SIZE, CUBE_SIZE, Format.RGBA8888);
+		pixmap.setColor(new Color(1f, 1f, 1f, 0.6f));
+		DrawUtils.drawBorder(pixmap, 2);
 		return pixmap;
 	}
 
@@ -219,27 +229,49 @@ public class Res {
 
 	private static void saveImagesToFile() {
 		int SIZE = 32;
-		int width = SIZE * 3;
+		int width = SIZE * 5;
 		int height = SIZE;
 		Pixmap pixmap = new Pixmap(width, height, Format.RGBA8888);
 
-		Pixmap wallImage = newWallImage(SIZE);
-		pixmap.drawPixmap(wallImage, 0, 0);
-		wallImage.dispose();
-
-		Pixmap rockImage = newRockImage(SIZE);
-		pixmap.drawPixmap(rockImage, SIZE, 0);
-		rockImage.dispose();
-
-		Pixmap humanImage = newHumanImage(SIZE);
-		pixmap.drawPixmap(humanImage, SIZE * 2, 0);
-		humanImage.dispose();
-
-		Pixmap newHumanEyeImage = newHumanEyeImage(SIZE);
-		pixmap.drawPixmap(newHumanEyeImage, SIZE * 2, 0);
-		newHumanEyeImage.dispose();
+		{
+			Pixmap wallImage = newWallImage(SIZE);
+			pixmap.drawPixmap(wallImage, 0, 0);
+			wallImage.dispose();
+		}
+		{
+			Pixmap rockImage = newRockImage(SIZE);
+			pixmap.drawPixmap(rockImage, SIZE, 0);
+			rockImage.dispose();
+		}
+		// human
+		{
+			Pixmap humanImage = newHumanImage(SIZE);
+			pixmap.drawPixmap(humanImage, SIZE * 2, 0);
+			humanImage.dispose();
+			Pixmap newHumanEyeImage = newHumanEyeImage(SIZE);
+			pixmap.drawPixmap(newHumanEyeImage, SIZE * 2, 0);
+			newHumanEyeImage.dispose();
+		}
+		// mapCube
+		{
+			Pixmap mapCubeImage = newColorPixmap(SIZE, SIZE, Color.LIGHT_GRAY);
+			mapCubeImage.setColor(Color.BLACK);
+			mapCubeImage.drawRectangle(SIZE / 3, SIZE / 3, SIZE / 3, SIZE / 3);
+			pixmap.drawPixmap(mapCubeImage, SIZE * 3, 0);
+			mapCubeImage.dispose();
+		}
+		// mapCube fixed
+		{
+			Pixmap mapCubeFixedImage = newColorPixmap(SIZE, SIZE, Color.LIGHT_GRAY);
+			mapCubeFixedImage.setColor(Color.BLACK);
+			mapCubeFixedImage.drawRectangle(SIZE / 3, SIZE / 3, SIZE / 3, SIZE / 3);
+			mapCubeFixedImage.drawRectangle(SIZE / 10, SIZE / 10, SIZE * 8 / 10, SIZE * 8 / 10);
+			pixmap.drawPixmap(mapCubeFixedImage, SIZE * 4, 0);
+			mapCubeFixedImage.dispose();
+		}
 
 		PixmapIO.writePNG(Gdx.files.local("gen/cubes.png"), pixmap);
 		pixmap.dispose();
+		Log.game.info("generate png at gen/cubes.png");
 	}
 }

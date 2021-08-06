@@ -23,8 +23,8 @@ public class DrawUtils {
 		int width = pixmap.getWidth();
 		int height = pixmap.getHeight();
 		pixmap.fillRectangle(0, 0, lineWidth, height);
-		pixmap.fillRectangle(0, 0, width, lineWidth);
-		pixmap.fillRectangle(0, height - lineWidth, width, height);
-		pixmap.fillRectangle(width - lineWidth, 0, width, height);
+		pixmap.fillRectangle(lineWidth, 0, width, lineWidth);
+		pixmap.fillRectangle(lineWidth, height - lineWidth, width, lineWidth);
+		pixmap.fillRectangle(width - lineWidth, lineWidth, lineWidth, height - lineWidth * 2);
 	}
 }

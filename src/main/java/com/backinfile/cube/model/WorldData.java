@@ -5,13 +5,17 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.backinfile.cube.Log;
+import com.backinfile.cube.Res;
 import com.backinfile.cube.model.cubes.Cube;
 import com.backinfile.cube.model.cubes.Human;
 import com.backinfile.cube.model.cubes.Key;
 import com.backinfile.cube.model.cubes.MapCube;
 import com.backinfile.cube.model.cubes.Rock;
 import com.backinfile.cube.model.cubes.Wall;
+import com.backinfile.cube.support.Utils;
 
 public class WorldData {
 	private List<MapData> datas = new ArrayList<>();
@@ -148,7 +152,124 @@ public class WorldData {
 
 	public static WorldData parseFromTiled(String conf) {
 		WorldData worldData = new WorldData();
+		Vector mainSize = new Vector();
+		JSONObject jsonConf = JSONObject.parseObject(conf);
+		mainSize.x = jsonConf.getInteger("width");
+		mainSize.y = jsonConf.getInteger("height");
 
+		JSONArray mapConfArray = jsonConf.getJSONArray("layers");
+		for (int i = 0; i < mapConfArray.size(); i++) {
+			JSONObject mapConf = mapConfArray.getJSONObject(i);
+			Vector size = new Vector(mainSize);
+			String sizeConf = getPropValue(mapConf, "size");
+			if (!Utils.isNullOrEmpty(sizeConf)) {
+				int[] sizeArray = Utils.str2IntArray(sizeConf);
+				size.set(sizeArray[0], sizeArray[1]);
+			}
+			String mapCubeConf = getPropValue(mapConf, "mapcube");
+			MapCubeConfs mapCubeConfs = MapCubeConfs.parseMapCubes(mapCubeConf);
+			MapData mapData = new MapData();
+			worldData.datas.add(mapData);
+			mapData.initMap((int) size.x, (int) size.y);
+			mapData.coor = mapConf.getString("name");
+			List<Integer> dataArray = JSONObject.parseArray(mapConf.getString("data"), Integer.class);
+			for (int x = 0; x < size.x; x++) {
+				for (int y = 0; y < size.y; y++) {
+					int type = dataArray.get(x + y * (int) mainSize.y);
+					Cube cube = null;
+					switch (type) {
+					case 1:
+						cube = new Wall();
+						break;
+					case 2:
+						cube = new Rock();
+						break;
+					case 3:
+						cube = new Human();
+						break;
+					case 4: {
+						String targetCoor = mapCubeConfs.getCoor(x, y);
+						cube = new MapCube(targetCoor);
+						if (Utils.isNullOrEmpty(targetCoor)) {
+							Log.game.warn("{},{},{} coor empty!!", mapData.coor, x, y);
+						}
+						break;
+					}
+					case 5: {
+						String targetCoor = mapCubeConfs.getCoor(x, y);
+						MapCube mapCube = new MapCube(targetCoor);
+						mapCube.setMovable(false);
+						cube = mapCube;
+						if (Utils.isNullOrEmpty(targetCoor)) {
+							Log.game.warn("{},{},{} coor empty!!", mapData.coor, x, y);
+						}
+						break;
+					}
+					default:
+						break;
+					}
+					if (cube != null) {
+						cube.originPosition.x = x;
+						cube.originPosition.y = mapData.height - y - 1;
+						cube.originPosition.worldCoor = mapData.coor;
+						cube.resetPosition();
+						mapData.cubeMap.add(cube);
+					}
+				}
+			}
+		}
+		worldData.setupRely();
 		return worldData;
+	}
+
+	private static class MapCubeConfs {
+		private List<MapCubeConf> confs = new ArrayList<>();
+
+		private static class MapCubeConf {
+			public int x;
+			public int y;
+			public String coor;
+
+			public MapCubeConf(int x, int y, String coor) {
+				this.x = x;
+				this.y = y;
+				this.coor = coor;
+			}
+
+		}
+
+		public static MapCubeConfs parseMapCubes(String mapCubeConf) {
+			MapCubeConfs mapCubeConfs = new MapCubeConfs();
+			if (Utils.isNullOrEmpty(mapCubeConf)) {
+				return mapCubeConfs;
+			}
+			String[] values = mapCubeConf.split(",");
+			for (int i = 0; i < values.length; i += 3) {
+				mapCubeConfs.confs.add(
+						new MapCubeConf(Integer.valueOf(values[i]), Integer.valueOf(values[i + 1]), values[i + 2]));
+			}
+			return mapCubeConfs;
+		}
+
+		public String getCoor(int x, int y) {
+			for (MapCubeConf conf : confs) {
+				if (conf.x == x && conf.y == y) {
+					return conf.coor;
+				}
+			}
+			return "";
+		}
+
+	}
+
+	private static String getPropValue(JSONObject mapConf, String name) {
+		JSONArray propConf = mapConf.getJSONArray("properties");
+		for (int i = 0; i < propConf.size(); i++) {
+			JSONObject prop = propConf.getJSONObject(i);
+			if (name.equals(prop.getString("name"))) {
+				return prop.getString("value");
+			}
+		}
+		return "";
 	}
 }

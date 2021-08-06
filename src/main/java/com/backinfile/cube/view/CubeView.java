@@ -53,6 +53,10 @@ public class CubeView extends Group {
 			mainImage.setVisible(false);
 			addActor(mainImage);
 		}
+		if (cube.isPushable()) {
+			borderImage = new Image(Res.CUBE_BORDER_WHITE);
+			addActor(borderImage);
+		}
 	}
 
 	public void setBorder(boolean show) {

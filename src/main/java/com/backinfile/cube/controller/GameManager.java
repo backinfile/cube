@@ -40,7 +40,7 @@ public class GameManager {
 
 	public void init() {
 		// 解析配置数据
-		worldData = WorldData.parse(Res.DefaultWorldConfString);
+		worldData = WorldData.parseFromTiled(Res.DefaultWorldConfStringByTiled);
 
 		// 初始化human位置
 		MapData firstMapData = worldData.getHumanMapData();
@@ -155,6 +155,9 @@ public class GameManager {
 			}
 			// 超出边界或者遇见墙了
 			if (nextPos == null || isPosStop(nextPos)) {
+				if (isPosMapCube(nextPos)) {
+					passPosList.add(nextPos);
+				}
 				List<Integer> mapCubePosIndexs = getSplitByMapCubePosList(passPosList);
 				// 没有进入方块的可能了，不能移动
 				if (mapCubePosIndexs.isEmpty()) {
@@ -182,6 +185,35 @@ public class GameManager {
 					}
 				}
 				// 尝试用方块吞噬
+				for (int index : mapCubePosIndexs) {
+					if (index + 1 >= passPosList.size()) {
+						continue;
+					}
+					Position startPosition2 = passPosList.get(index);
+					Position nextPosition2 = passPosList.get(index + 1);
+					if (isPosStop(nextPosition2)) {
+						continue;
+					}
+					ArrayList<Position> newPassPosList = Utils.subList(passPosList, 0, index);
+					MapCube mapCube = (MapCube) getCube(startPosition2);
+					Position edgePos = getEdgePos(mapCube.getTargetCoor(), d.getOppsite());
+					if (edgePos != null) {
+						newPassPosList.add(startPosition2);
+						newPassPosList.add(nextPosition2);
+						newPassPosList.add(edgePos);
+						if (isPosEmpty(edgePos)) { // 方块入口为空，直接移动过去
+							passPosList.clear();
+							passPosList.addAll(newPassPosList);
+							return true;
+						} else {
+							if (testCubeMove(edgePos, d.getOppsite(), newPassPosList)) {
+								passPosList.clear();
+								passPosList.addAll(newPassPosList);
+								return true;
+							}
+						}
+					}
+				}
 				return false;
 			}
 			// 碰到空地了，可以直接移动
@@ -197,8 +229,8 @@ public class GameManager {
 
 	private List<Integer> getSplitByMapCubePosList(List<Position> posList) {
 		List<Integer> indexList = new ArrayList<>();
-//		for (int i = posList.size() - 1; i >= 0; i--) {
-		for (int i = 0; i < posList.size(); i++) {
+		for (int i = posList.size() - 1; i >= 0; i--) {
+//		for (int i = 0; i < posList.size(); i++) {
 			Cube cube = getCube(posList.get(i));
 			if (cube != null && cube instanceof MapCube) {
 				indexList.add(i);
@@ -322,6 +354,12 @@ public class GameManager {
 		MapData mapData = worldData.getMapData(position.worldCoor);
 		Cube cube = mapData.cubeMap.get(position.x, position.y);
 		return cube != null && !cube.isEmpty() && !cube.isPushable();
+	}
+
+	private boolean isPosMapCube(Position position) {
+		MapData mapData = worldData.getMapData(position.worldCoor);
+		Cube cube = mapData.cubeMap.get(position.x, position.y);
+		return cube instanceof MapCube;
 	}
 
 	private boolean isPosPushable(Position position) {

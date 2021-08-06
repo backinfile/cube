@@ -2,7 +2,6 @@ package com.backinfile.cube.controller;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -37,25 +36,18 @@ public class GameViewManager {
 	private Set<CubeView> lastInView = new HashSet<>();
 
 	public void updateCubeView(History history) {
-		if (history != null) {
-			adjustCubeViewOwnGroup(history);
-		}
+		adjustCubeViewOwnGroup(history);
 		WorldStage worldStage = GameManager.instance.worldStage;
 		WorldData worldData = GameManager.instance.worldData;
 
-		Human human = GameManager.instance.human;
-		Position lastPosition = human.getLastPosition();
-		if (lastPosition != null && !lastPosition.worldCoor.equals(human.position.worldCoor)) {
-			ANI_DURATION = 0.3f;
-		} else {
-			ANI_DURATION = 0.15f;
-		}
+		preSetAniDuration(history);
 
 		// 预先计算好group的位置和大小
 		preCalcGroupPosAndSize();
 
 		// 收集要移动的方块
 		Set<Cube> movedCubes = new HashSet<>();
+		Set<Cube> movedMapCubes = new HashSet<>();
 		for (Movement movement : history.getMovements()) {
 			movedCubes.add(movement.cube);
 		}
@@ -67,6 +59,7 @@ public class GameViewManager {
 					MapCube mapCube = (MapCube) cube;
 					movedCubes.remove(mapCube);
 					movedCubes.addAll(worldData.getMapData(mapCube.getTargetCoor()).cubeMap.getUnitList());
+					movedMapCubes.add(mapCube);
 				} else {
 					movedCubes.add(cube);
 				}
@@ -75,6 +68,7 @@ public class GameViewManager {
 				break;
 			}
 		}
+		movedCubes.addAll(movedMapCubes);
 
 		// !! 应该只更新发生移动的mapcube对应group的pos
 		// 先通过动画移动到确定位置
@@ -90,7 +84,7 @@ public class GameViewManager {
 			ActionUtils.sizeTo(cubeView, cubeWidth, cubeHeight, ANI_DURATION);
 			Log.game.info("{} {},{} {},{}", cubeView.getCube(), targetX, targetY, cubeWidth, cubeHeight);
 
-			// 任务移动动画
+			// 人物移动动画
 			if (cube instanceof Human) {
 				cubeView.setHumanEyeOffset(GameManager.instance.lastHumanMove.x * cubeWidth / 10,
 						GameManager.instance.lastHumanMove.y * cubeHeight / 10, ANI_DURATION);
@@ -114,6 +108,22 @@ public class GameViewManager {
 			staticSetView();
 			Log.game.info("done");
 		});
+	}
+
+	private void preSetAniDuration(History history) {
+		Human human = GameManager.instance.human;
+		Position lastPosition = human.getLastPosition();
+		if (lastPosition != null && !lastPosition.worldCoor.equals(human.position.worldCoor)) {
+			ANI_DURATION = 0.4f;
+			return;
+		}
+		for (Movement movement : history.getMovements()) {
+			if (!movement.cube.position.worldCoor.equals(movement.cube.getLastPosition().worldCoor)) {
+				ANI_DURATION = 0.25f;
+				return;
+			}
+		}
+		ANI_DURATION = 0.1f;
 	}
 
 	private void preCalcGroupPosAndSize() {

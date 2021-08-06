@@ -9,6 +9,11 @@ public class Vector {
 	public Vector() {
 	}
 
+	public Vector(Vector vector) {
+		this.x = vector.x;
+		this.y = vector.y;
+	}
+
 	public Vector(float x, float y) {
 		this.x = x;
 		this.y = y;
@@ -22,6 +27,10 @@ public class Vector {
 	public void set(Vector vector) {
 		this.x = vector.x;
 		this.y = vector.y;
+	}
+	
+	public Vector getOppsite() {
+		return new Vector(-x, -y);
 	}
 
 	@Override

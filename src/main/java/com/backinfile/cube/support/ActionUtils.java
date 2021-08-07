@@ -12,7 +12,7 @@ public class ActionUtils {
 		moveToAction.setDuration(duration);
 		moveToAction.setPosition(x, y);
 		actor.addAction(moveToAction);
-		Log.game.info("from {},{} to {},{}", actor.getX(), actor.getY(), x, y);
+		Log.game.debug("from {},{} to {},{}", actor.getX(), actor.getY(), x, y);
 	}
 
 	public static void moveTo(Actor actor, float x, float y) {

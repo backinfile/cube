@@ -1,8 +1,10 @@
 package com.backinfile.cube.model.cubes;
 
-public class Key extends MapCube {
+// 地板上的透明钥匙方块，可与相合的MapCube组合
+public class FixedKey extends MapCube {
+	
 
-	public Key(String targetCoor) {
+	public FixedKey(String targetCoor) {
 		super(targetCoor);
 	}
 

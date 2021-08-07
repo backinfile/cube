@@ -16,7 +16,9 @@ import com.backinfile.cube.model.WorldData;
 import com.backinfile.cube.model.History.Movement;
 import com.backinfile.cube.model.cubes.Cube;
 import com.backinfile.cube.model.cubes.Human;
-import com.backinfile.cube.model.cubes.Key;
+import com.backinfile.cube.model.cubes.Lock;
+import com.backinfile.cube.model.cubes.Player;
+import com.backinfile.cube.model.cubes.FixedKey;
 import com.backinfile.cube.model.cubes.MapCube;
 import com.backinfile.cube.model.cubes.Wall;
 import com.backinfile.cube.support.ActionUtils;
@@ -86,8 +88,9 @@ public class GameViewManager {
 
 			// 人物移动动画
 			if (cube instanceof Human) {
-				cubeView.setHumanEyeOffset(GameManager.instance.lastHumanMove.x * cubeWidth / 10,
-						GameManager.instance.lastHumanMove.y * cubeHeight / 10, ANI_DURATION);
+				Human human = (Human) cube;
+				cubeView.setHumanEyeOffset(human.lastMove.x * cubeWidth / 10, human.lastMove.y * cubeHeight / 10,
+						ANI_DURATION);
 			}
 		}
 
@@ -106,12 +109,12 @@ public class GameViewManager {
 		GameManager.instance.timerQueue.applyTimer((long) (ANI_DURATION * Time2.SEC) + 10, () -> {
 			GameManager.instance.enableController = true;
 			staticSetView();
-			Log.game.info("done");
+			Log.game.debug("done");
 		});
 	}
 
 	private void preSetAniDuration(History history) {
-		Human human = GameManager.instance.human;
+		Player human = GameManager.instance.human;
 		Position lastPosition = human.getLastPosition();
 		if (lastPosition != null && !lastPosition.worldCoor.equals(human.position.worldCoor)) {
 			ANI_DURATION = 0.4f;
@@ -204,7 +207,7 @@ public class GameViewManager {
 					cubeGroup.getWidth() * MainViewScale * (worldStage.getWidth() / worldStage.getHeight()),
 					cubeGroup.getHeight() * MainViewScale);
 			camera.position.set(savePos.x + cubeGroup.getWidth() / 2, savePos.y + cubeGroup.getHeight() / 2, 0);
-			Log.game.info("{}, {}, {}", camera.position, camera.viewportWidth, camera.viewportHeight);
+			Log.game.debug("{}, {}, {}", camera.position, camera.viewportWidth, camera.viewportHeight);
 			camera.update();
 			worldStage.getBatch().setProjectionMatrix(camera.combined);
 		}
@@ -238,21 +241,19 @@ public class GameViewManager {
 			if (cube instanceof MapCube) {
 				MapCube mapCube = (MapCube) cube;
 				cubeView.setMainImageVisible(mapCube.isFitKey());
-				float nextAlpha = (alpha < 1f || cube instanceof Key) ? Res.FLOOR_ELE_ALPHA : 1f;
+				float nextAlpha = (alpha < 1f || cube instanceof FixedKey) ? Res.FLOOR_ELE_ALPHA : 1f;
 				staticSetView(mapCube.getTargetCoor(), x + cube.position.x * cubeWidth,
 						y + cube.position.y * cubeHeight, cubeWidth, cubeHeight, nextAlpha, layer - 2);
 			} else if (cube instanceof Wall) {
 				List<Integer> adjWallDirections = GameManager.instance.getAdjWallDirections(cube.position);
 				cubeView.setAdjWallDirections(adjWallDirections);
 			} else if (cube instanceof Human) {
-				cubeView.setHumanEyeOffset(GameManager.instance.lastHumanMove.x * cubeWidth / 10,
-						GameManager.instance.lastHumanMove.y * cubeHeight / 10, 0);
+				Human human = (Human) cube;
+				cubeView.setHumanEyeOffset(human.lastMove.x * cubeWidth / 10, human.lastMove.y * cubeHeight / 10, 0);
+			} else if (cube instanceof Lock) {
+				cubeView.setLocked(((Lock) cube).isLocked());
 			}
 		}
-	}
-
-	public void dealMoveCubes(Movements movements) {
-
 	}
 
 	private void adjustCubeViewOwnGroup(History history) {

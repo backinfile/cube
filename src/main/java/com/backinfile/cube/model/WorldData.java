@@ -10,8 +10,9 @@ import com.alibaba.fastjson.JSONObject;
 import com.backinfile.cube.Log;
 import com.backinfile.cube.Res;
 import com.backinfile.cube.model.cubes.Cube;
-import com.backinfile.cube.model.cubes.Human;
-import com.backinfile.cube.model.cubes.Key;
+import com.backinfile.cube.model.cubes.Player;
+import com.backinfile.cube.model.cubes.FixedKey;
+import com.backinfile.cube.model.cubes.Lock;
 import com.backinfile.cube.model.cubes.MapCube;
 import com.backinfile.cube.model.cubes.Rock;
 import com.backinfile.cube.model.cubes.Wall;
@@ -96,7 +97,7 @@ public class WorldData {
 						char curChar = line.charAt(w);
 						switch (curChar) {
 						case C_HUMAN:
-							cube = new Human();
+							cube = new Player();
 							break;
 						case C_ROCK:
 							cube = new Rock();
@@ -112,7 +113,7 @@ public class WorldData {
 						if (Character.isLowerCase(curChar)) {
 							cube = new MapCube(curMapData.coor + curChar);
 						} else if (Character.isDigit(curChar)) {
-							cube = new Key(curMapData.coor + curChar);
+							cube = new FixedKey(curMapData.coor + curChar);
 						}
 						if (cube != null) {
 							cube.originPosition.x = w;
@@ -185,28 +186,34 @@ public class WorldData {
 						cube = new Rock();
 						break;
 					case 3:
-						cube = new Human();
+						cube = new Player();
 						break;
 					case 4: {
-						String targetCoor = mapCubeConfs.getCoor(x, y);
-						cube = new MapCube(targetCoor);
-						if (Utils.isNullOrEmpty(targetCoor)) {
-							Log.game.warn("{},{},{} coor empty!!", mapData.coor, x, y);
-						}
+						cube = new MapCube(mapCubeConfs.getCoor(x, y));
 						break;
 					}
 					case 5: {
-						String targetCoor = mapCubeConfs.getCoor(x, y);
-						MapCube mapCube = new MapCube(targetCoor);
+						MapCube mapCube = new MapCube(mapCubeConfs.getCoor(x, y));
 						mapCube.setMovable(false);
 						cube = mapCube;
-						if (Utils.isNullOrEmpty(targetCoor)) {
-							Log.game.warn("{},{},{} coor empty!!", mapData.coor, x, y);
-						}
+						break;
+					}
+					case 6: {
+						FixedKey fixedKey = new FixedKey(mapCubeConfs.getCoor(x, y));
+						cube = fixedKey;
+						break;
+					}
+					case 7: {
+						cube = new Lock();
 						break;
 					}
 					default:
 						break;
+					}
+					if (cube instanceof MapCube) {
+						if (Utils.isNullOrEmpty(((MapCube) cube).getTargetCoor())) {
+							Log.game.warn("{},{},{} coor empty!!", mapData.coor, x, y);
+						}
 					}
 					if (cube != null) {
 						cube.originPosition.x = x;
@@ -264,6 +271,9 @@ public class WorldData {
 
 	private static String getPropValue(JSONObject mapConf, String name) {
 		JSONArray propConf = mapConf.getJSONArray("properties");
+		if (propConf == null) {
+			return "";
+		}
 		for (int i = 0; i < propConf.size(); i++) {
 			JSONObject prop = propConf.getJSONObject(i);
 			if (name.equals(prop.getString("name"))) {

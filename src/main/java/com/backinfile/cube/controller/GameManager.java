@@ -13,8 +13,9 @@ import com.backinfile.cube.model.Position;
 import com.backinfile.cube.model.Vector;
 import com.backinfile.cube.model.WorldData;
 import com.backinfile.cube.model.cubes.Cube;
-import com.backinfile.cube.model.cubes.Human;
-import com.backinfile.cube.model.cubes.Key;
+import com.backinfile.cube.model.cubes.Player;
+import com.backinfile.cube.model.cubes.FixedKey;
+import com.backinfile.cube.model.cubes.Lock;
 import com.backinfile.cube.model.cubes.MapCube;
 import com.backinfile.cube.model.cubes.Wall;
 import com.backinfile.cube.support.TimerQueue;
@@ -28,9 +29,9 @@ public class GameManager {
 	public WorldStage worldStage;
 	public TimerQueue timerQueue;
 
-	public Human human;
+	public Player human;
 	private LinkedList<History> histories = new LinkedList<History>();
-	public Vector lastHumanMove = new Vector();
+	private Vector lastHumanMove = new Vector();
 	public boolean enableController = true;
 
 	public static final int[] dx = new int[] { 0, 0, -1, 1 };
@@ -45,8 +46,8 @@ public class GameManager {
 		// 初始化human位置
 		MapData firstMapData = worldData.getHumanMapData();
 		for (Cube cube : firstMapData.cubeMap.getUnitList()) {
-			if (cube instanceof Human) {
-				human = (Human) cube;
+			if (cube instanceof Player) {
+				human = (Player) cube;
 				break;
 			}
 		}
@@ -130,6 +131,9 @@ public class GameManager {
 			} else {
 				cube.moveTo(newPosition);
 			}
+			if (cube instanceof Player) {
+				((Player) cube).lastMove.set(lastHumanMove);
+			}
 		}
 		// 检查解锁
 		checkFitKey();
@@ -155,7 +159,7 @@ public class GameManager {
 			}
 			// 超出边界或者遇见墙了
 			if (nextPos == null || isPosStop(nextPos)) {
-				if (isPosMapCube(nextPos)) {
+				if (nextPos != null && isPosMapCube(nextPos)) {
 					passPosList.add(nextPos);
 				}
 				List<Integer> mapCubePosIndexs = getSplitByMapCubePosList(passPosList);
@@ -311,17 +315,23 @@ public class GameManager {
 	}
 
 	public void checkFitKey() {
+
+		// 重置
 		for (MapData mapData : worldData.getMapDatas()) {
 			for (Cube cube : mapData.cubeMap.getUnitList()) {
 				if (cube instanceof MapCube) {
 					((MapCube) cube).setFitKey(false);
+				} else if (cube instanceof Lock) {
+					((Lock) cube).setLocked(true);
 				}
 			}
 		}
 
 		for (MapData mapData : worldData.getMapDatas()) {
+			boolean allLockFited = true;
 			for (Cube cube : mapData.cubeMap.getUnitList()) {
-				if (cube instanceof Key) {
+				if (cube instanceof FixedKey) {
+					FixedKey fixedKey = (FixedKey) cube;
 					for (Cube matchCube : mapData.cubeMap.getAll(cube.position.x, cube.position.y)) {
 						if (matchCube == cube) {
 							continue;
@@ -329,17 +339,33 @@ public class GameManager {
 						if (!(matchCube instanceof MapCube)) {
 							continue;
 						}
-						if (matchCube instanceof Key) {
+						if (matchCube instanceof FixedKey) {
 							continue;
 						}
-						MapData keyMapData = worldData.getMapData(((Key) cube).getTargetCoor());
-						MapData cubeMapData = worldData.getMapData(((MapCube) matchCube).getTargetCoor());
+						MapCube matchedMapCube = (MapCube) matchCube;
+						MapData keyMapData = worldData.getMapData(fixedKey.getTargetCoor());
+						MapData cubeMapData = worldData.getMapData(matchedMapCube.getTargetCoor());
 						if (keyMapData.isMatchWith(cubeMapData)) {
-							((MapCube) matchCube).setFitKey(true);
+							matchedMapCube.setFitKey(true);
+							fixedKey.setFitKey(true);
+							break;
 						}
+					}
+					if (!fixedKey.isFitKey()) {
+						allLockFited = false;
 					}
 
 				}
+			}
+
+			// 如果所有Key都解锁了，解锁Lock
+			if (allLockFited) {
+				for (Cube cube : mapData.cubeMap.getUnitList()) {
+					if (cube instanceof Lock) {
+						((Lock) cube).setLocked(false);
+					}
+				}
+
 			}
 		}
 	}

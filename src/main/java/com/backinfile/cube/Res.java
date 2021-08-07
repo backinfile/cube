@@ -20,7 +20,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 
 @SuppressWarnings("unused")
 public class Res {
-	public static final int CUBE_SIZE = Settings.SCREEN_HEIGHT / 6;
+	public static final int CUBE_SIZE = 64;
 	public static final int CUBE_BORDER_WIDTH = CUBE_SIZE * 5 / 50;
 	public static final int CUBE_BORDER_WIDTH_THIN = 1;
 	public static final float FLOOR_ELE_ALPHA = 0.3f;
@@ -45,6 +45,7 @@ public class Res {
 	public static TextureRegionDrawable CUBE_HUMAN;
 	public static TextureRegionDrawable CUBE_HUMAN_EYE;
 	public static TextureRegionDrawable CUBE_ALPHA_MASK;
+	public static TextureRegionDrawable CUBE_LOCK;
 
 	public static Pixmap Cursor;
 	public static TextureRegionDrawable TextFieldCursor;
@@ -89,9 +90,9 @@ public class Res {
 		TEX_BLUE = getDrawable(newColorPixmap(8, 8, Color.BLUE));
 
 		CUBE_BORDER_BLACK = getDrawable(newBorderImage(Color.BLACK));
-		CUBE_BORDER_WHITE = getDrawable(newWhiteBorderImage());
+		CUBE_BORDER_WHITE = getDrawable(newBorderImage(new Color(1f, 1f, 1f, 0.6f)));
 		CUBE_BORDER_DARK = getDrawable(newBorderImage(Color.DARK_GRAY));
-		CUBE_BORDER_BLUE = getDrawable(newBorderImage(new Color(0, 0, 1f, 0.5f)));
+		CUBE_BORDER_BLUE = getDrawable(newBorderImage(new Color(0f, 0f, 1f, 0.6f)));
 		Pixmap[] newBorderAsideImage = newBorderAsideImage(Color.BLACK);
 		CUBE_BORDER_ASIDE = new TextureRegionDrawable[newBorderAsideImage.length];
 		for (int i = 0; i < newBorderAsideImage.length; i++) {
@@ -104,6 +105,7 @@ public class Res {
 		CUBE_HUMAN = getDrawable(newHumanImage(CUBE_SIZE));
 		CUBE_HUMAN_EYE = getDrawable(newHumanEyeImage(CUBE_SIZE));
 		CUBE_ALPHA_MASK = getDrawable(newColorPixmap(CUBE_SIZE, CUBE_SIZE, new Color(1, 1, 1, 0.5f)));
+		CUBE_LOCK = getDrawable(newLockImage(CUBE_SIZE));
 
 		Cursor = newCursorPixmap();
 		TextFieldCursor = getDrawable(newTextFieldCursorPixmap());
@@ -128,6 +130,19 @@ public class Res {
 
 	private static Pixmap newWallImage(int size) {
 		return newColorPixmap(size, size, Color.DARK_GRAY);
+	}
+
+	private static Pixmap newLockImage(int size) {
+		Pixmap pixmap = new Pixmap(size, size, Format.RGBA8888);
+		Pixmap targetPixmap = null;
+		if (size > 32) {
+			targetPixmap = new Pixmap(Gdx.files.internal("cube/lock64.png"));
+		} else {
+			targetPixmap = new Pixmap(Gdx.files.internal("cube/lock32.png"));
+		}
+		pixmap.drawPixmap(targetPixmap, 0, 0, 0, 0, targetPixmap.getWidth(), targetPixmap.getHeight());
+		targetPixmap.dispose();
+		return pixmap;
 	}
 
 	private static Pixmap newRockImage(int size) {
@@ -167,7 +182,7 @@ public class Res {
 	private static Pixmap newBorderImage(Color color) {
 		Pixmap pixmap = new Pixmap(CUBE_SIZE, CUBE_SIZE, Format.RGBA8888);
 		pixmap.setColor(color);
-		DrawUtils.drawBorder(pixmap, 1);
+		DrawUtils.drawBorder(pixmap, 2);
 		return pixmap;
 	}
 
@@ -229,7 +244,7 @@ public class Res {
 
 	private static void saveImagesToFile() {
 		int SIZE = 32;
-		int width = SIZE * 5;
+		int width = SIZE * 7;
 		int height = SIZE;
 		Pixmap pixmap = new Pixmap(width, height, Format.RGBA8888);
 
@@ -252,22 +267,49 @@ public class Res {
 			pixmap.drawPixmap(newHumanEyeImage, SIZE * 2, 0);
 			newHumanEyeImage.dispose();
 		}
-		// mapCube
+		// mapCube movable
 		{
 			Pixmap mapCubeImage = newColorPixmap(SIZE, SIZE, Color.LIGHT_GRAY);
-			mapCubeImage.setColor(Color.BLACK);
-			mapCubeImage.drawRectangle(SIZE / 3, SIZE / 3, SIZE / 3, SIZE / 3);
+			mapCubeImage.setColor(Color.DARK_GRAY);
+			mapCubeImage.fillRectangle(SIZE / 8, SIZE / 8, SIZE * 6 / 8, SIZE * 6 / 8);
+			mapCubeImage.setColor(Color.WHITE);
+			DrawUtils.drawBorder(mapCubeImage, SIZE / 8);
 			pixmap.drawPixmap(mapCubeImage, SIZE * 3, 0);
 			mapCubeImage.dispose();
 		}
 		// mapCube fixed
 		{
-			Pixmap mapCubeFixedImage = newColorPixmap(SIZE, SIZE, Color.LIGHT_GRAY);
-			mapCubeFixedImage.setColor(Color.BLACK);
-			mapCubeFixedImage.drawRectangle(SIZE / 3, SIZE / 3, SIZE / 3, SIZE / 3);
-			mapCubeFixedImage.drawRectangle(SIZE / 10, SIZE / 10, SIZE * 8 / 10, SIZE * 8 / 10);
-			pixmap.drawPixmap(mapCubeFixedImage, SIZE * 4, 0);
-			mapCubeFixedImage.dispose();
+			Pixmap mapCubeImage = newColorPixmap(SIZE, SIZE, Color.LIGHT_GRAY);
+			mapCubeImage.setColor(Color.DARK_GRAY);
+			mapCubeImage.fillRectangle(SIZE / 8, SIZE / 8, SIZE * 6 / 8, SIZE * 6 / 8);
+			mapCubeImage.setColor(Color.BLACK);
+			DrawUtils.drawBorder(mapCubeImage, SIZE / 8);
+			pixmap.drawPixmap(mapCubeImage, SIZE * 4, 0);
+			mapCubeImage.dispose();
+		}
+		// fixedKey
+		{
+			Pixmap mapCubeImage = newColorPixmap(SIZE, SIZE, Color.LIGHT_GRAY);
+			mapCubeImage.setColor(Color.DARK_GRAY);
+			mapCubeImage.fillRectangle(SIZE / 8, SIZE / 8, SIZE * 6 / 8, SIZE * 6 / 8);
+			mapCubeImage.setColor(Color.BLACK);
+			DrawUtils.drawBorder(mapCubeImage, SIZE / 8);
+			mapCubeImage.drawLine(SIZE * 2 / 5, 0, SIZE / 4, SIZE);
+			mapCubeImage.drawLine(SIZE * 2 / 5, SIZE / 2, SIZE, SIZE);
+			mapCubeImage.drawLine(SIZE * 2 / 5, SIZE / 2, SIZE, 0);
+			pixmap.drawPixmap(mapCubeImage, SIZE * 5, 0);
+			mapCubeImage.dispose();
+		}
+		// lock
+		{
+			Pixmap mapCubeImage = newColorPixmap(SIZE, SIZE, Color.LIGHT_GRAY);
+			mapCubeImage.setColor(Color.DARK_GRAY);
+			mapCubeImage.fillRectangle(SIZE / 8, SIZE / 8, SIZE * 6 / 8, SIZE * 6 / 8);
+			mapCubeImage.setColor(Color.BLACK);
+			DrawUtils.drawBorder(mapCubeImage, SIZE / 8);
+			mapCubeImage.drawPixmap(newLockImage(SIZE), 0, 0);
+			pixmap.drawPixmap(mapCubeImage, SIZE * 6, 0);
+			mapCubeImage.dispose();
 		}
 
 		PixmapIO.writePNG(Gdx.files.local("gen/cubes.png"), pixmap);

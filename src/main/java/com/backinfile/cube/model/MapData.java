@@ -1,7 +1,7 @@
 package com.backinfile.cube.model;
 
 import com.backinfile.cube.model.cubes.Cube;
-import com.backinfile.cube.model.cubes.Human;
+import com.backinfile.cube.model.cubes.Player;
 import com.backinfile.cube.model.cubes.MapCube;
 import com.backinfile.cube.model.cubes.Wall;
 
@@ -24,7 +24,7 @@ public class MapData {
 
 	public boolean hasHuman() {
 		for (Cube cube : cubeMap.getUnitList()) {
-			if (cube instanceof Human) {
+			if (cube instanceof Player) {
 				return true;
 			}
 		}

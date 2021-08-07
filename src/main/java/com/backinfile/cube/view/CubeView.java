@@ -2,17 +2,17 @@ package com.backinfile.cube.view;
 
 import java.util.List;
 
-import com.backinfile.cube.Log;
 import com.backinfile.cube.Res;
 import com.backinfile.cube.controller.GameManager;
-import com.backinfile.cube.model.cubes.Cube;
 import com.backinfile.cube.model.cubes.Human;
+import com.backinfile.cube.model.cubes.Lock;
+import com.backinfile.cube.model.cubes.Cube;
+import com.backinfile.cube.model.cubes.Player;
 import com.backinfile.cube.model.cubes.MapCube;
 import com.backinfile.cube.model.cubes.Rock;
 import com.backinfile.cube.model.cubes.Wall;
 import com.backinfile.cube.support.Utils;
 import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction;
@@ -26,6 +26,8 @@ public class CubeView extends Group {
 	private Image borderImage;
 	private Image[] borderAsideImages;
 	private Image humanEyeImage;
+	private Image lockImage;
+	private boolean locked = true;
 
 	public CubeView(Cube cube) {
 		this.cube = cube;
@@ -48,14 +50,24 @@ public class CubeView extends Group {
 			humanEyeImage = new Image(Res.CUBE_HUMAN_EYE);
 			addActor(mainImage);
 			addActor(humanEyeImage);
-		} else if (cube instanceof MapCube) {
+		} else if (cube instanceof Lock) {
+			mainImage = new Image(Res.CUBE_WALL);
+			borderImage = new Image(Res.CUBE_BORDER_BLACK);
+			lockImage = new Image(Res.CUBE_LOCK);
+			lockImage.getColor().a = 0.3f;
+			addActor(mainImage);
+			addActor(borderImage);
+			addActor(lockImage);
+			setLocked(((Lock) cube).isLocked());
+		}
+		if (!(cube instanceof Wall) && cube.isPushable()) {
+			borderImage = new Image(Res.CUBE_BORDER_WHITE);
+			addActor(borderImage);
+		}
+		if (cube instanceof MapCube) {
 			mainImage = new Image(Res.CUBE_BORDER_BLUE);
 			mainImage.setVisible(false);
 			addActor(mainImage);
-		}
-		if (cube.isPushable()) {
-			borderImage = new Image(Res.CUBE_BORDER_WHITE);
-			addActor(borderImage);
 		}
 	}
 
@@ -118,6 +130,12 @@ public class CubeView extends Group {
 
 	public void setMainImageVisible(boolean visible) {
 		mainImage.setVisible(visible);
+	}
+
+	public void setLocked(boolean locked) {
+		mainImage.setVisible(locked);
+		borderImage.setVisible(locked);
+		lockImage.getColor().a = locked ? 0.3f : 0.1f;
 	}
 
 	@Override

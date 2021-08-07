@@ -5,7 +5,7 @@ public class MapCube extends Cube {
 	protected boolean movable = true;
 	protected boolean enterable = true;
 
-	// 是否符合Key, 显示用
+	// 是否被Key解锁了
 	protected boolean fitKey = false;
 
 	public MapCube(String targetCoor) {

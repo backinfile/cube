@@ -1,9 +1,6 @@
 package com.backinfile.cube.model.cubes;
 
-import com.backinfile.cube.model.Vector;
-
-public class Human extends Cube {
-	public Vector lastMove = new Vector();
+public class Player extends Human {
 
 	@Override
 	public boolean isPushable() {

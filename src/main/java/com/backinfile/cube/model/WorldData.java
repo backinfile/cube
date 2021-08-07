@@ -17,6 +17,7 @@ import com.backinfile.cube.model.cubes.Lock;
 import com.backinfile.cube.model.cubes.MapCube;
 import com.backinfile.cube.model.cubes.Rock;
 import com.backinfile.cube.model.cubes.Wall;
+import com.backinfile.cube.support.Tuple2;
 import com.backinfile.cube.support.Utils;
 
 public class WorldData {
@@ -100,7 +101,7 @@ public class WorldData {
 					MapConfInfo target = mapConfs.get(mapCubeConf.targetCoor); // TODO
 					Log.game.info("finding {}", mapCubeConf.targetCoor);// TODO
 					if (target != null) {// TODO
-						MapConfInfo copy = target.getCopyWithPrefix(mapCubeConf.targetCoor);
+						MapConfInfo copy = target.getCopyWithPrefix(mapCubeConf.finalCoor);
 						mapConfs.put(mapCubeConf.finalCoor, copy);
 						confQueue.addAll(copy.confs);
 					}
@@ -174,17 +175,17 @@ public class WorldData {
 	private static class MapCubeConf {
 		public int x;
 		public int y;
-		public String oriCoorStr; // 原始配置
-		public String targetCoor; // 进行复制的目标
-		public String finalCoor; // 最终坐标
+		public String oriCoorStr = ""; // 原始配置
+		public String targetCoor = ""; // 进行复制的目标
+		public String finalCoor = ""; // 最终坐标
 
 		public MapCubeConf copyWithPrefix(String prefix) {
 			MapCubeConf conf = new MapCubeConf();
 			conf.x = this.x;
 			conf.y = this.y;
 			conf.oriCoorStr = this.oriCoorStr;
-			conf.targetCoor = prefix + this.targetCoor;
-			conf.finalCoor = prefix + this.finalCoor;
+			conf.targetCoor = this.targetCoor;
+			conf.finalCoor = prefix + this.targetCoor;
 			return conf;
 		}
 	}
@@ -234,8 +235,8 @@ public class WorldData {
 					conf.targetCoor = conf.oriCoorStr.replaceAll("\\#", "");
 					conf.finalCoor = conf.oriCoorStr.replaceAll("\\#", mapInfo.mapCoor);
 				} else {
-					conf.finalCoor = conf.oriCoorStr;
 					conf.targetCoor = "";
+					conf.finalCoor = conf.oriCoorStr;
 				}
 				mapInfo.confs.add(conf);
 			}

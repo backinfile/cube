@@ -9,7 +9,15 @@ public class History {
 	public static class Movement {
 		public Cube cube;
 		public Position position;
-		
+
+		public Movement() {
+		}
+
+		public Movement(Cube cube, Position position) {
+			this.cube = cube;
+			this.position = position;
+		}
+
 		@Override
 		public String toString() {
 			return cube.toString() + "<-" + position;
@@ -32,17 +40,10 @@ public class History {
 		return history;
 	}
 
-	// TODO
-	public void playback() {
-		for (Movement movement : movements) {
-			movement.cube.position.setPosition(movement.position);
-		}
-	}
-	
 	public List<Movement> getMovements() {
 		return movements;
 	}
-	
+
 	@Override
 	public String toString() {
 		return movements.toString();

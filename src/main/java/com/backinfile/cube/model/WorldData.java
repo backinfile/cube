@@ -3,12 +3,12 @@ package com.backinfile.cube.model;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.backinfile.cube.Log;
-import com.backinfile.cube.Res;
 import com.backinfile.cube.model.cubes.Cube;
 import com.backinfile.cube.model.cubes.Player;
 import com.backinfile.cube.model.cubes.FixedKey;
@@ -159,20 +159,35 @@ public class WorldData {
 		mainSize.y = jsonConf.getInteger("height");
 
 		JSONArray mapConfArray = jsonConf.getJSONArray("layers");
+		HashMap<String, MapConfInfo> mapConfs = new HashMap<>();
+		// 读取所有基础地图
 		for (int i = 0; i < mapConfArray.size(); i++) {
 			JSONObject mapConf = mapConfArray.getJSONObject(i);
-			Vector size = new Vector(mainSize);
-			String sizeConf = getPropValue(mapConf, "size");
-			if (!Utils.isNullOrEmpty(sizeConf)) {
-				int[] sizeArray = Utils.str2IntArray(sizeConf);
-				size.set(sizeArray[0], sizeArray[1]);
+			String oriCoor = mapConf.getString("name");
+			if (!Utils.isNullOrEmpty(oriCoor)) {
+				mapConfs.put(oriCoor, MapConfInfo.parseMapCubes(mapConf));
 			}
-			String mapCubeConf = getPropValue(mapConf, "mapcube");
-			MapCubeConfs mapCubeConfs = MapCubeConfs.parseMapCubes(mapCubeConf);
+		}
+		// 复制所需地图
+		for (String mapCoor : new ArrayList<>(mapConfs.keySet())) {
+			MapConfInfo mapConf = mapConfs.get(mapCoor);
+			for (MapCubeConf mapCubeConf : mapConf.getAllMapCubeConf()) {
+				if (!Utils.isNullOrEmpty(mapCubeConf.targetCoor)) {
+					MapConfInfo target = mapConfs.get(mapCubeConf.targetCoor);
+					if (target != null) {
+						mapConfs.put(mapCubeConf.finalCoor, target);
+					}
+				}
+			}
+		}
+		for (String mapCoor : mapConfs.keySet()) {
+			MapConfInfo mapInfo = mapConfs.get(mapCoor);
+			JSONObject mapConf = mapInfo.mapConf;
+			Vector size = new Vector(mapInfo.size);
 			MapData mapData = new MapData();
 			worldData.datas.add(mapData);
 			mapData.initMap((int) size.x, (int) size.y);
-			mapData.coor = mapConf.getString("name");
+			mapData.coor = mapCoor;
 			List<Integer> dataArray = JSONObject.parseArray(mapConf.getString("data"), Integer.class);
 			for (int x = 0; x < size.x; x++) {
 				for (int y = 0; y < size.y; y++) {
@@ -189,17 +204,17 @@ public class WorldData {
 						cube = new Player();
 						break;
 					case 4: {
-						cube = new MapCube(mapCubeConfs.getCoor(x, y));
+						cube = new MapCube(mapInfo.getMapCubeTargetCoor(x, y));
 						break;
 					}
 					case 5: {
-						MapCube mapCube = new MapCube(mapCubeConfs.getCoor(x, y));
+						MapCube mapCube = new MapCube(mapInfo.getMapCubeTargetCoor(x, y));
 						mapCube.setMovable(false);
 						cube = mapCube;
 						break;
 					}
 					case 6: {
-						FixedKey fixedKey = new FixedKey(mapCubeConfs.getCoor(x, y));
+						FixedKey fixedKey = new FixedKey(mapInfo.getMapCubeTargetCoor(x, y));
 						cube = fixedKey;
 						break;
 					}
@@ -229,44 +244,79 @@ public class WorldData {
 		return worldData;
 	}
 
-	private static class MapCubeConfs {
+	private static class MapCubeConf {
+		public int x;
+		public int y;
+		public String oriCoorStr; // 原始配置
+		public String targetCoor; // 进行复制的目标
+		public String finalCoor; // 最终坐标
+	}
+
+	private static class MapConfInfo {
+		private String mapCoor;
+		private JSONObject mapConf;
+		private Vector size = new Vector();
 		private List<MapCubeConf> confs = new ArrayList<>();
 
-		private static class MapCubeConf {
-			public int x;
-			public int y;
-			public String coor;
+		public static MapConfInfo parseMapCubes(JSONObject mapConf) {
+			MapConfInfo mapInfo = new MapConfInfo();
+			mapInfo.mapConf = mapConf;
+			mapInfo.mapCoor = mapConf.getString("name");
 
-			public MapCubeConf(int x, int y, String coor) {
-				this.x = x;
-				this.y = y;
-				this.coor = coor;
+			// 解析地图大小
+			String sizeConf = getPropValue(mapConf, "size");
+			if (!Utils.isNullOrEmpty(sizeConf)) {
+				int[] sizeArray = Utils.str2IntArray(sizeConf);
+				mapInfo.size.set(sizeArray[0], sizeArray[1]);
+			} else {
+				int maxSize = 1;
+				List<Integer> dataArray = JSONObject.parseArray(mapConf.getString("data"), Integer.class);
+				for (int x = 0; x < 11; x++) {
+					for (int y = 0; y < 11; y++) {
+						int type = dataArray.get(x + y * 11);
+						if (type > 0) {
+							maxSize = Math.max(maxSize, Math.max(x, y) + 1);
+						}
+					}
+				}
+				mapInfo.size.set(maxSize, maxSize);
 			}
 
-		}
-
-		public static MapCubeConfs parseMapCubes(String mapCubeConf) {
-			MapCubeConfs mapCubeConfs = new MapCubeConfs();
+			// 解析地图跳转信息
+			String mapCubeConf = getPropValue(mapConf, "mapcube");
 			if (Utils.isNullOrEmpty(mapCubeConf)) {
-				return mapCubeConfs;
+				return mapInfo;
 			}
 			String[] values = mapCubeConf.split(",");
 			for (int i = 0; i < values.length; i += 3) {
-				mapCubeConfs.confs.add(
-						new MapCubeConf(Integer.valueOf(values[i]), Integer.valueOf(values[i + 1]), values[i + 2]));
+				MapCubeConf conf = new MapCubeConf();
+				conf.x = Integer.valueOf(values[i + 0].trim());
+				conf.y = Integer.valueOf(values[i + 1].trim());
+				conf.oriCoorStr = values[i + 2].trim();
+				if (conf.oriCoorStr.contains("#")) {
+					conf.targetCoor = conf.oriCoorStr.replaceAll("\\#", "");
+					conf.finalCoor = conf.oriCoorStr.replaceAll("\\#", mapInfo.mapCoor);
+				} else {
+					conf.finalCoor = conf.oriCoorStr;
+					conf.targetCoor = "";
+				}
+				mapInfo.confs.add(conf);
 			}
-			return mapCubeConfs;
+			return mapInfo;
 		}
 
-		public String getCoor(int x, int y) {
+		public String getMapCubeTargetCoor(int x, int y) {
 			for (MapCubeConf conf : confs) {
 				if (conf.x == x && conf.y == y) {
-					return conf.coor;
+					return conf.finalCoor;
 				}
 			}
 			return "";
 		}
 
+		public List<MapCubeConf> getAllMapCubeConf() {
+			return confs;
+		}
 	}
 
 	private static String getPropValue(JSONObject mapConf, String name) {
@@ -274,9 +324,11 @@ public class WorldData {
 		if (propConf == null) {
 			return "";
 		}
+		name = name.toLowerCase();
 		for (int i = 0; i < propConf.size(); i++) {
 			JSONObject prop = propConf.getJSONObject(i);
-			if (name.equals(prop.getString("name"))) {
+			String propValue = prop.getString("name");
+			if (propValue != null && name.equals(propValue.toLowerCase())) {
 				return prop.getString("value");
 			}
 		}

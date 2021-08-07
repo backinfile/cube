@@ -59,8 +59,9 @@ public class GameManager {
 
 	public void undo() {
 		if (!histories.isEmpty()) {
+			lastHumanMove.set(0, 0);
 			History history = histories.pollLast();
-//			history.playback();
+			doMovePosition(history.getMovements(), false);
 		}
 	}
 
@@ -106,10 +107,10 @@ public class GameManager {
 			movement.position = new Position(passPosList.get(i + 1));
 			movements.add(movement);
 		}
-		doMovePosition(movements);
+		doMovePosition(movements, true);
 	}
 
-	private void doMovePosition(List<Movement> movements) {
+	private void doMovePosition(List<Movement> movements, boolean record) {
 		List<Cube> movedCubes = new ArrayList<>();
 		for (Movement movement : movements) {
 			movedCubes.add(movement.cube);
@@ -117,7 +118,9 @@ public class GameManager {
 
 		// 先记录下移动之前的情况
 		History history = History.getHistory(movedCubes);
-		histories.addLast(history);
+		if (record) {
+			histories.addLast(history);
+		}
 
 		// 进行移动
 		for (Movement movement : movements) {
@@ -281,33 +284,19 @@ public class GameManager {
 		Position position = new Position();
 		position.worldCoor = worldCoor;
 		if (d.x == 0) {
-			// 先找空格
-			for (int x = 0; x < mapData.width; x++) {
-				position.setPosition(x, d.y < 0 ? mapData.height - 1 : 0);
-				if (mapData.cubeMap.get(position) == null) {
-					return position;
-				}
-			}
-			// 再找可以被推开的
 			for (int x = 0; x < mapData.width; x++) {
 				position.setPosition(x, d.y < 0 ? mapData.height - 1 : 0);
 				Cube cube = mapData.cubeMap.get(position);
-				if (cube != null && cube.isPushable()) {
-					return cube.position;
+				if (cube == null || cube.isEmpty() || cube.isPushable()) {
+					return position;
 				}
 			}
 		} else {
 			for (int y = 0; y < mapData.width; y++) {
 				position.setPosition(d.x < 0 ? mapData.height - 1 : 0, y);
-				if (mapData.cubeMap.get(position) == null) {
-					return position;
-				}
-			}
-			for (int y = 0; y < mapData.width; y++) {
-				position.setPosition(d.x < 0 ? mapData.height - 1 : 0, y);
 				Cube cube = mapData.cubeMap.get(position);
-				if (cube != null && cube.isPushable()) {
-					return cube.position;
+				if (cube == null || cube.isEmpty() || cube.isPushable()) {
+					return position;
 				}
 			}
 		}
@@ -363,9 +352,9 @@ public class GameManager {
 				for (Cube cube : mapData.cubeMap.getUnitList()) {
 					if (cube instanceof Lock) {
 						((Lock) cube).setLocked(false);
+						Log.game.info("unLock {}, id:{}", cube, cube.getId());
 					}
 				}
-
 			}
 		}
 	}

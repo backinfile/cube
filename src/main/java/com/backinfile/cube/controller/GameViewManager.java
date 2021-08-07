@@ -9,7 +9,6 @@ import com.backinfile.cube.Log;
 import com.backinfile.cube.Res;
 import com.backinfile.cube.model.History;
 import com.backinfile.cube.model.MapData;
-import com.backinfile.cube.model.Movements;
 import com.backinfile.cube.model.Position;
 import com.backinfile.cube.model.Vector;
 import com.backinfile.cube.model.WorldData;
@@ -256,15 +255,26 @@ public class GameViewManager {
 		}
 	}
 
-	private void adjustCubeViewOwnGroup(History history) {
+	public void adjustCubeViewOwnGroup(History history, boolean reverse) {
 		WorldStage worldStage = GameManager.instance.worldStage;
 		// 调整方块到合适的group
 		for (Movement movement : history.getMovements()) {
-			if (!movement.position.worldCoor.equals(movement.cube.position.worldCoor)) {
-				CubeView cubeView = worldStage.removeCubeView(movement.position.worldCoor, movement.cube);
-				worldStage.addCubeView(movement.cube.position.worldCoor, cubeView);
+			Position from = movement.position;
+			Position to = movement.cube.position;
+			if (reverse) {
+				Position tmp = from;
+				from = to;
+				to = tmp;
+			}
+			if (!from.worldCoor.equals(to.worldCoor)) {
+				CubeView cubeView = worldStage.removeCubeView(from.worldCoor, movement.cube);
+				worldStage.addCubeView(to.worldCoor, cubeView);
 			}
 		}
+	}
+
+	private void adjustCubeViewOwnGroup(History history) {
+		adjustCubeViewOwnGroup(history, false);
 	}
 
 	public void moveCameraAuto() {

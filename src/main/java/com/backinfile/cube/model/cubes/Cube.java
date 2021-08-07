@@ -4,6 +4,8 @@ import com.backinfile.cube.model.Position;
 import com.backinfile.cube.model.WorldUnit;
 
 public abstract class Cube extends WorldUnit {
+	private static long idMax = 0;
+	private long id;
 	private Position lastPosition = null;
 
 	public void moveTo(Position newPosition) {
@@ -16,6 +18,14 @@ public abstract class Cube extends WorldUnit {
 
 	public Position getLastPosition() {
 		return lastPosition;
+	}
+
+	public Cube() {
+		id = idMax++;
+	}
+	
+	public long getId() {
+		return id;
 	}
 
 	/**

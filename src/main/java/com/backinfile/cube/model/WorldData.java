@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 import com.alibaba.fastjson.JSONArray;
@@ -91,15 +92,17 @@ public class WorldData {
 		// 复制所需地图
 		for (String mapCoor : new ArrayList<>(mapConfs.keySet())) {
 			MapConfInfo mapConf = mapConfs.get(mapCoor);
-			for (MapCubeConf mapCubeConf : mapConf.getAllMapCubeConf()) {
+			LinkedList<MapCubeConf> confQueue = new LinkedList<>();
+			confQueue.addAll(mapConf.getAllMapCubeConf());
+			while (!confQueue.isEmpty()) {
+				MapCubeConf mapCubeConf = confQueue.pollFirst();
 				if (!Utils.isNullOrEmpty(mapCubeConf.targetCoor)) {
 					MapConfInfo target = mapConfs.get(mapCubeConf.targetCoor); // TODO
-					if (target != null) {
+					Log.game.info("finding {}", mapCubeConf.targetCoor);// TODO
+					if (target != null) {// TODO
 						MapConfInfo copy = target.getCopyWithPrefix(mapCubeConf.targetCoor);
 						mapConfs.put(mapCubeConf.finalCoor, copy);
-						for(MapCubeConf innerConf: copy.confs) {
-							// TODO loop
-						}
+						confQueue.addAll(copy.confs);
 					}
 				}
 			}

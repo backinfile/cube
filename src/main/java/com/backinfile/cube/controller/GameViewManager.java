@@ -120,7 +120,8 @@ public class GameViewManager {
 			return;
 		}
 		for (Movement movement : history.getMovements()) {
-			if (!movement.cube.position.worldCoor.equals(movement.cube.getLastPosition().worldCoor)) {
+			Position lastPosition2 = movement.cube.getLastPosition();
+			if (lastPosition2 != null && !movement.cube.position.worldCoor.equals(lastPosition2.worldCoor)) {
 				ANI_DURATION = 0.25f;
 				return;
 			}

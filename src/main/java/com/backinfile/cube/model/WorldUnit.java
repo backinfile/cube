@@ -18,6 +18,7 @@ public class WorldUnit {
 	public void resetPosition() {
 		this.position.setPosition(originPosition);
 	}
+	
 
 	@Override
 	public String toString() {

@@ -54,87 +54,7 @@ public class WorldData {
 		return null;
 	}
 
-	private static final String R_INDEX = "index=";
-	private static final String R_SIZE = "size=";
-	private static final String R_MAP = "map=";
-	private static final String R_FLOOR = "floor=";
-	private static final String R_TEXT = "text=";
-	private static final String R_VIEW = "view=";
-
-	private static final char C_HUMAN = 'M';
-	private static final char C_WALL = 'W';
-	private static final char C_ROCK = 'R';
-	private static final char C_EMPTY = ' ';
-
-	public static WorldData parse(String worldConf) {
-		WorldData world = new WorldData();
-		MapData curMapData = null;
-		String[] confs = worldConf.split("\n");
-		for (int index = 0; index < confs.length; index++) {
-			String curLine = confs[index].trim();
-			if (curLine.startsWith(R_INDEX)) {
-				if (curMapData != null) {
-					world.datas.add(curMapData);
-				}
-				curMapData = new MapData();
-				curMapData.coor = curLine.substring(R_INDEX.length());
-			} else if (curLine.startsWith(R_SIZE)) {
-				String[] sizeConf = curLine.substring(R_SIZE.length()).split("\\*");
-				if (sizeConf.length == 2) {
-					int width = Integer.valueOf(sizeConf[0]);
-					int height = Integer.valueOf(sizeConf[1]);
-					curMapData.initMap(width, height);
-				}
-			} else if (curLine.startsWith(R_TEXT)) {
-				curMapData.tipText = curLine.substring(R_TEXT.length()).trim();
-			} else if (curLine.startsWith(R_VIEW)) {
-				curMapData.view = curLine.substring(R_VIEW.length()).trim();
-			} else if (curLine.startsWith(R_MAP)) {
-				for (int h = 0; h < curMapData.height; h++) {
-					String line = confs[index + h + 1];
-					for (int w = 0; w < curMapData.width; w++) {
-						Cube cube = null;
-						char curChar = line.charAt(w);
-						switch (curChar) {
-						case C_HUMAN:
-							cube = new Player();
-							break;
-						case C_ROCK:
-							cube = new Rock();
-							break;
-						case C_WALL:
-							cube = new Wall();
-							break;
-						case C_EMPTY:
-							break;
-						default:
-							break;
-						}
-						if (Character.isLowerCase(curChar)) {
-							cube = new MapCube(curMapData.coor + curChar);
-						} else if (Character.isDigit(curChar)) {
-							cube = new FixedKey(curMapData.coor + curChar);
-						}
-						if (cube != null) {
-							cube.originPosition.x = w;
-							cube.originPosition.y = curMapData.height - h - 1;
-							cube.originPosition.worldCoor = curMapData.coor;
-							cube.resetPosition();
-							curMapData.cubeMap.add(cube);
-						}
-					}
-				}
-				index += curMapData.height;
-			}
-		}
-		if (curMapData != null) {
-			world.datas.add(curMapData);
-		}
-		world.setupRely();
-		return world;
-	}
-
-	private void setupRely() {
+	public void setupRely() {
 		for (MapData mapData : datas) {
 			for (Cube cube : mapData.cubeMap.getUnitList()) {
 				if (cube instanceof MapCube) {
@@ -173,9 +93,13 @@ public class WorldData {
 			MapConfInfo mapConf = mapConfs.get(mapCoor);
 			for (MapCubeConf mapCubeConf : mapConf.getAllMapCubeConf()) {
 				if (!Utils.isNullOrEmpty(mapCubeConf.targetCoor)) {
-					MapConfInfo target = mapConfs.get(mapCubeConf.targetCoor);
+					MapConfInfo target = mapConfs.get(mapCubeConf.targetCoor); // TODO
 					if (target != null) {
-						mapConfs.put(mapCubeConf.finalCoor, target);
+						MapConfInfo copy = target.getCopyWithPrefix(mapCubeConf.targetCoor);
+						mapConfs.put(mapCubeConf.finalCoor, copy);
+						for(MapCubeConf innerConf: copy.confs) {
+							// TODO loop
+						}
 					}
 				}
 			}
@@ -250,6 +174,16 @@ public class WorldData {
 		public String oriCoorStr; // 原始配置
 		public String targetCoor; // 进行复制的目标
 		public String finalCoor; // 最终坐标
+
+		public MapCubeConf copyWithPrefix(String prefix) {
+			MapCubeConf conf = new MapCubeConf();
+			conf.x = this.x;
+			conf.y = this.y;
+			conf.oriCoorStr = this.oriCoorStr;
+			conf.targetCoor = prefix + this.targetCoor;
+			conf.finalCoor = prefix + this.finalCoor;
+			return conf;
+		}
 	}
 
 	private static class MapConfInfo {
@@ -303,6 +237,17 @@ public class WorldData {
 				mapInfo.confs.add(conf);
 			}
 			return mapInfo;
+		}
+
+		public MapConfInfo getCopyWithPrefix(String prefix) {
+			MapConfInfo thisCopy = new MapConfInfo();
+			thisCopy.mapCoor = prefix + this.mapCoor;
+			thisCopy.mapConf = this.mapConf;
+			thisCopy.size.set(this.size);
+			for (MapCubeConf conf : this.confs) {
+				thisCopy.confs.add(conf.copyWithPrefix(prefix));
+			}
+			return thisCopy;
 		}
 
 		public String getMapCubeTargetCoor(int x, int y) {

@@ -1,8 +1,10 @@
 package com.backinfile.cube.controller;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import com.backinfile.cube.Log;
 import com.backinfile.cube.Res;
@@ -15,6 +17,7 @@ import com.backinfile.cube.model.WorldData;
 import com.backinfile.cube.model.cubes.Cube;
 import com.backinfile.cube.model.cubes.Player;
 import com.backinfile.cube.model.cubes.FixedKey;
+import com.backinfile.cube.model.cubes.Human;
 import com.backinfile.cube.model.cubes.Lock;
 import com.backinfile.cube.model.cubes.MapCube;
 import com.backinfile.cube.model.cubes.Wall;
@@ -33,6 +36,7 @@ public class GameManager {
 	private LinkedList<History> histories = new LinkedList<History>();
 	private Vector lastHumanMove = new Vector();
 	public boolean enableController = true;
+	private Map<String, Position> firstEnterMapPosition = new HashMap<>();
 
 	public static final int[] dx = new int[] { 0, 0, -1, 1 };
 	public static final int[] dy = new int[] { 1, -1, 0, 0 };
@@ -51,10 +55,39 @@ public class GameManager {
 				break;
 			}
 		}
+
+		firstEnterMapPosition.put(firstMapData.coor, human.originPosition);
 	}
 
 	public void resetGame() {
-		human.resetPosition();
+		MapData humanMapData = worldData.getHumanMapData();
+
+		// 检查是否是可以重置的房间，临时用有没有锁来判定
+		boolean hasLock = false;
+		for (Cube cube : humanMapData.cubeMap.getUnitList()) {
+			if (cube instanceof Lock) {
+				hasLock = true;
+				break;
+			}
+		}
+		if (!hasLock) {
+			return;
+		}
+		List<Movement> movements = new ArrayList<>();
+
+		for (Cube cube : humanMapData.cubeMap.getUnitList()) {
+			Position targetPosition;
+			if (cube instanceof Player) {
+				targetPosition = firstEnterMapPosition.get(humanMapData.coor);
+			} else {
+				targetPosition = cube.originPosition;
+			}
+			if (!cube.position.equals(targetPosition)) {
+				movements.add(new Movement(cube, targetPosition));
+			}
+		}
+		lastHumanMove.set(0, 0);
+		doMovePosition(movements, true);
 	}
 
 	public void undo() {
@@ -122,6 +155,15 @@ public class GameManager {
 			histories.addLast(history);
 		}
 
+		// 记录第一次进入房间的位置
+		for (Movement movement : movements) {
+			if (movement.cube instanceof Player) {
+				if (!firstEnterMapPosition.containsKey(movement.position.worldCoor)) {
+					firstEnterMapPosition.put(movement.position.worldCoor, movement.position);
+				}
+			}
+		}
+
 		// 进行移动
 		for (Movement movement : movements) {
 			Position position = movement.cube.position;
@@ -140,6 +182,8 @@ public class GameManager {
 		}
 		// 检查解锁
 		checkFitKey();
+
+		worldData.setupRely();
 
 		// 刷新界面
 		GameViewManager.instance.updateCubeView(history);

@@ -36,7 +36,7 @@ public class GamePlayInputProcessor implements InputProcessor {
 			gameManager.moveHuman(3);
 			break;
 		case Keys.R:
-			gameManager.resetGame();
+//			gameManager.resetGame();
 			break;
 		case Keys.Z:
 			gameManager.undo();

@@ -3,7 +3,6 @@ package com.backinfile.cube.model;
 import com.backinfile.cube.model.cubes.Cube;
 import com.backinfile.cube.model.cubes.Player;
 import com.backinfile.cube.model.cubes.MapCube;
-import com.backinfile.cube.model.cubes.Wall;
 
 public class MapData {
 	public String coor = ""; // 所处位置
@@ -41,24 +40,53 @@ public class MapData {
 		}
 	}
 
-	public boolean isMatchWith(MapData other) {
+	public boolean isMatchWith(WorldData worldData, MapData other) {
 		if (width != other.width || height != other.height) {
 			return false;
 		}
 		for (int i = 0; i < width; i++) {
 			for (int j = 0; j < height; j++) {
-				int cnt = 0;
-				if (cubeMap.get(i, j) instanceof Wall) {
-					cnt++;
-				}
-				if (other.cubeMap.get(i, j) instanceof Wall) {
-					cnt++;
-				}
-				if (cnt != 1) {
+				Cube thisCube = cubeMap.get(i, j);
+				Cube otherCube = other.cubeMap.get(i, j);
+				if (!testFillOther(worldData, thisCube, otherCube) && !testFillOther(worldData, otherCube, thisCube)) {
 					return false;
 				}
 			}
 		}
 		return true;
+	}
+
+	private static boolean testFillOther(WorldData worldData, Cube cube, Cube other) {
+		if (other == null || other.isEmpty()) {
+			return isCubeFilled(worldData, cube);
+		}
+		if (other instanceof MapCube) {
+			if (cube == null || cube.isEmpty()) {
+				return isCubeFilled(worldData, cube);
+			}
+			if (cube instanceof MapCube) {
+				MapData thisMap = worldData.getMapData(((MapCube) cube).getTargetCoor());
+				MapData otherMap = worldData.getMapData(((MapCube) other).getTargetCoor());
+				return thisMap.isMatchWith(worldData, otherMap);
+			}
+		}
+		return false;
+	}
+
+	private static boolean isCubeFilled(WorldData worldData, Cube cube) {
+		if (cube == null) {
+			return false;
+		}
+		if (cube instanceof MapCube) {
+			MapData mapData = worldData.getMapData((((MapCube) cube).getTargetCoor()));
+			for (int x = 0; x < mapData.width; x++) {
+				for (int y = 0; y < mapData.height; y++) {
+					if (!isCubeFilled(worldData, mapData.cubeMap.get(x, y))) {
+						return false;
+					}
+				}
+			}
+		}
+		return !cube.isEmpty();
 	}
 }

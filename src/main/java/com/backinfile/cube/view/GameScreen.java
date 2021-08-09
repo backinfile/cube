@@ -25,11 +25,11 @@ public class GameScreen implements Screen {
 			worldStage = new WorldStage(new ExtendViewport(Settings.SCREEN_WIDTH, Settings.SCREEN_HEIGHT));
 			Gdx.input.setInputProcessor(new GamePlayInputProcessor(GameManager.instance));
 			GameManager.instance.worldStage = worldStage;
-			GameManager.instance.timerQueue.applyTimer(0, () -> {
-				GameViewManager.instance.staticSetView();
-			});
 		}
 
+		GameManager.instance.timerQueue.applyTimer(0, () -> {
+			GameViewManager.instance.staticSetView();
+		});
 	}
 
 	@Override
@@ -56,6 +56,9 @@ public class GameScreen implements Screen {
 
 	@Override
 	public void resume() {
+		GameManager.instance.timerQueue.applyTimer(0, () -> {
+			GameViewManager.instance.staticSetView();
+		});
 	}
 
 	@Override

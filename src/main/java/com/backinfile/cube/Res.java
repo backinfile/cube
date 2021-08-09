@@ -1,8 +1,11 @@
 package com.backinfile.cube;
 
 import java.nio.ByteBuffer;
+import java.util.HashSet;
 
 import com.backinfile.cube.support.DrawUtils;
+import com.backinfile.cube.support.TimeLogger;
+import com.backinfile.cube.support.Timing;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
@@ -68,6 +71,24 @@ public class Res {
 		}
 	}
 
+	private static class FontCharacterCollection {
+		private HashSet<Character> characters = new HashSet<Character>();
+
+		public void put(String str) {
+			for (int i = 0; i < str.length(); i++) {
+				characters.add(str.charAt(i));
+			}
+		}
+
+		public String getAll() {
+			StringBuilder sb = new StringBuilder();
+			for (Character ch : characters) {
+				sb.append(ch);
+			}
+			return sb.toString();
+		}
+	}
+
 	private static TextureRegionDrawable getDrawable(Pixmap pixmap) {
 		Texture texture = new Texture(pixmap, true);
 		TextureRegion region = new TextureRegion(texture);
@@ -75,11 +96,13 @@ public class Res {
 		return new TextureRegionDrawable(region);
 	}
 
+	@Timing
 	private static void initText() {
 		DefaultWorldConfString = Gdx.files.internal("map.txt").readString();
 		DefaultWorldConfStringByTiled = Gdx.files.internal("tiled/world.json").readString();
 	}
 
+	@Timing
 	private static void initImage() {
 
 		TEX_BLACK = getDrawable(newColorPixmap(8, 8, Color.BLACK));
@@ -111,6 +134,7 @@ public class Res {
 		TextFieldCursor = getDrawable(newTextFieldCursorPixmap());
 	}
 
+	@Timing
 	private static void initFont() {
 		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("font/msyh.ttc"));
 		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
@@ -242,6 +266,7 @@ public class Res {
 		return new Label(text, new LabelStyle(DefaultFont, Color.WHITE));
 	}
 
+	@Timing
 	private static void saveImagesToFile() {
 		int SIZE = 32;
 		int width = SIZE * 7;

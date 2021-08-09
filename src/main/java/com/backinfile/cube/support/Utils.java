@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Utils {
+	public static final String UTF8 = "utf-8";
+
 	public static boolean isNullOrEmpty(String str) {
 		return str == null || str.equals("");
 	}
@@ -29,5 +31,5 @@ public class Utils {
 		}
 		return result;
 	}
-	
+
 }

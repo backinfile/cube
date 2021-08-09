@@ -17,7 +17,6 @@ import com.backinfile.cube.model.cubes.Lock;
 import com.backinfile.cube.model.cubes.MapCube;
 import com.backinfile.cube.model.cubes.Rock;
 import com.backinfile.cube.model.cubes.Wall;
-import com.backinfile.cube.support.Tuple2;
 import com.backinfile.cube.support.Utils;
 
 public class WorldData {

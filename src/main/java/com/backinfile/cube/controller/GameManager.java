@@ -17,11 +17,11 @@ import com.backinfile.cube.model.WorldData;
 import com.backinfile.cube.model.cubes.Cube;
 import com.backinfile.cube.model.cubes.Player;
 import com.backinfile.cube.model.cubes.FixedKey;
-import com.backinfile.cube.model.cubes.Human;
 import com.backinfile.cube.model.cubes.Lock;
 import com.backinfile.cube.model.cubes.MapCube;
 import com.backinfile.cube.model.cubes.Wall;
 import com.backinfile.cube.support.TimerQueue;
+import com.backinfile.cube.support.Timing;
 import com.backinfile.cube.support.Utils;
 import com.backinfile.cube.view.WorldStage;
 
@@ -43,6 +43,7 @@ public class GameManager {
 	public static final int[] dx8 = new int[] { 0, 0, -1, 1, -1, 1, -1, 1 };
 	public static final int[] dy8 = new int[] { 1, -1, 0, 0, -1, 1, 1, -1 };
 
+	@Timing("world data init")
 	public void init() {
 		// 解析配置数据
 		worldData = WorldData.parseFromTiled(Res.DefaultWorldConfStringByTiled);
@@ -378,7 +379,7 @@ public class GameManager {
 						MapCube matchedMapCube = (MapCube) matchCube;
 						MapData keyMapData = worldData.getMapData(fixedKey.getTargetCoor());
 						MapData cubeMapData = worldData.getMapData(matchedMapCube.getTargetCoor());
-						if (keyMapData.isMatchWith(cubeMapData)) {
+						if (keyMapData.isMatchWith(worldData, cubeMapData)) {
 							matchedMapCube.setFitKey(true);
 							fixedKey.setFitKey(true);
 							break;

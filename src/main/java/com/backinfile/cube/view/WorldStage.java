@@ -12,6 +12,7 @@ import com.backinfile.cube.controller.GameManager;
 import com.backinfile.cube.model.MapData;
 import com.backinfile.cube.model.cubes.Cube;
 import com.backinfile.cube.model.cubes.Player;
+import com.backinfile.cube.support.Timing;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
@@ -33,6 +34,7 @@ public class WorldStage extends Stage {
 		init();
 	}
 
+	@Timing("world stage init")
 	private void init() {
 		// 初始化方块
 		cubeGroupRoot = new Group();

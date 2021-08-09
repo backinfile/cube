@@ -56,9 +56,9 @@ public class GameScreen implements Screen {
 
 	@Override
 	public void resume() {
-		GameManager.instance.timerQueue.applyTimer(0, () -> {
-			GameViewManager.instance.staticSetView();
-		});
+//		GameManager.instance.timerQueue.applyTimer(0, () -> {
+//			GameViewManager.instance.staticSetView();
+//		});
 	}
 
 	@Override

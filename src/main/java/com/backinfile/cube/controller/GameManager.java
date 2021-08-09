@@ -8,6 +8,7 @@ import java.util.Map;
 
 import com.backinfile.cube.Log;
 import com.backinfile.cube.Res;
+import com.backinfile.cube.Settings;
 import com.backinfile.cube.model.History;
 import com.backinfile.cube.model.History.Movement;
 import com.backinfile.cube.model.MapData;
@@ -20,6 +21,7 @@ import com.backinfile.cube.model.cubes.FixedKey;
 import com.backinfile.cube.model.cubes.Lock;
 import com.backinfile.cube.model.cubes.MapCube;
 import com.backinfile.cube.model.cubes.Wall;
+import com.backinfile.cube.support.SysException;
 import com.backinfile.cube.support.TimerQueue;
 import com.backinfile.cube.support.Timing;
 import com.backinfile.cube.support.Utils;
@@ -49,21 +51,30 @@ public class GameManager {
 		worldData = WorldData.parseFromTiled(Res.DefaultWorldConfStringByTiled);
 
 		// 初始化human位置
-		MapData firstMapData = worldData.getHumanMapData();
-		for (Cube cube : firstMapData.cubeMap.getUnitList()) {
-			if (cube instanceof Player) {
-				human = (Player) cube;
-				break;
+		int humanCnt = 0;
+		for (MapData mapData : worldData.getMapDatas()) {
+			for (Cube cube : mapData.cubeMap.getUnitList()) {
+				if (cube instanceof Player) {
+					human = (Player) cube;
+					humanCnt++;
+				}
 			}
+		}
+		if (humanCnt != 1) {
+			Log.game.error("humanCnt=" + humanCnt);
 		}
 
 		firstEnterMapPosition.clear();
-		firstEnterMapPosition.put(firstMapData.coor, human.originPosition);
+		firstEnterMapPosition.put(human.position.worldCoor, human.originPosition);
 		enableController = true;
 		histories.clear();
 	}
 
 	public void resetGame() {
+		if (!Settings.DEV) {
+			return;
+		}
+
 		init();
 		worldStage.clear();
 		worldStage.init();
@@ -328,59 +339,71 @@ public class GameManager {
 	}
 
 	public void checkFitKey() {
-
 		// 重置
 		for (MapData mapData : worldData.getMapDatas()) {
 			for (Cube cube : mapData.cubeMap.getUnitList()) {
 				if (cube instanceof MapCube) {
 					((MapCube) cube).setFitKey(false);
 				} else if (cube instanceof Lock) {
-					((Lock) cube).setLocked(true);
+					Lock lock = (Lock) cube;
+					// 当开着的开关被占用时，维持开着的状态
+					if (!lock.isLocked()) {
+						List<Cube> all = mapData.cubeMap.getAll(lock.position.x, lock.position.y);
+						if (!all.stream().anyMatch(c -> !c.isEmpty())) {
+							lock.setLocked(true);
+						}
+					}
 				}
 			}
 		}
 
 		for (MapData mapData : worldData.getMapDatas()) {
-			boolean allLockFited = true;
-			for (Cube cube : mapData.cubeMap.getUnitList()) {
-				if (cube instanceof FixedKey) {
-					FixedKey fixedKey = (FixedKey) cube;
-					for (Cube matchCube : mapData.cubeMap.getAll(cube.position.x, cube.position.y)) {
-						if (matchCube == cube) {
-							continue;
-						}
-						if (!(matchCube instanceof MapCube)) {
-							continue;
-						}
-						if (matchCube instanceof FixedKey) {
-							continue;
-						}
-						MapCube matchedMapCube = (MapCube) matchCube;
-						MapData keyMapData = worldData.getMapData(fixedKey.getTargetCoor());
-						MapData cubeMapData = worldData.getMapData(matchedMapCube.getTargetCoor());
-						if (keyMapData.isMatchWith(worldData, cubeMapData)) {
-							matchedMapCube.setFitKey(true);
-							fixedKey.setFitKey(true);
-							break;
-						}
-					}
-					if (!fixedKey.isFitKey()) {
-						allLockFited = false;
-					}
-
-				}
-			}
-
 			// 如果所有Key都解锁了，解锁Lock
-			if (allLockFited) {
+			if (testMapAllKeyFited(mapData)) {
 				for (Cube cube : mapData.cubeMap.getUnitList()) {
 					if (cube instanceof Lock) {
 						((Lock) cube).setLocked(false);
-						Log.game.info("unLock {}, id:{}", cube, cube.getId());
+						Log.game.debug("unLock {}, id:{}", cube, cube.getId());
 					}
 				}
 			}
 		}
+	}
+
+	private boolean testMapAllKeyFited(MapData mapData) {
+		for (Cube cube : mapData.cubeMap.getUnitList()) {
+			if (cube instanceof FixedKey) {
+				FixedKey fixedKey = (FixedKey) cube;
+				for (Cube matchCube : mapData.cubeMap.getAll(cube.position.x, cube.position.y)) {
+					if (matchCube == cube) {
+						continue;
+					}
+					if (!(matchCube instanceof MapCube)) {
+						continue;
+					}
+					if (matchCube instanceof FixedKey) {
+						continue;
+					}
+					MapCube matchedMapCube = (MapCube) matchCube;
+					MapData keyMapData = worldData.getMapData(fixedKey.getTargetCoor());
+					MapData cubeMapData = worldData.getMapData(matchedMapCube.getTargetCoor());
+					if (keyMapData.isMatchWith(worldData, cubeMapData)) {
+						matchedMapCube.setFitKey(true);
+						fixedKey.setFitKey(true);
+						break;
+					}
+				}
+				if (!fixedKey.isFitKey()) {
+					return false;
+				}
+			} else if (cube instanceof MapCube) {
+				MapData targetMapData = worldData.getMapData(((MapCube) cube).getTargetCoor());
+				if (!testMapAllKeyFited(targetMapData)) {
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 
 	private boolean isPosEmpty(Position position) {

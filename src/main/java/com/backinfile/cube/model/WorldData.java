@@ -154,7 +154,7 @@ public class WorldData {
 					}
 					if (cube instanceof MapCube) {
 						if (Utils.isNullOrEmpty(((MapCube) cube).getTargetCoor())) {
-							Log.game.warn("{},{},{} coor empty!!", mapData.coor, x, y);
+							Log.game.error("{},{},{} coor empty!!", mapData.coor, x, y);
 						}
 					}
 					if (cube != null) {

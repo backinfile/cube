@@ -89,4 +89,9 @@ public class MapData {
 		}
 		return !cube.isEmpty();
 	}
+
+	@Override
+	public String toString() {
+		return coor + "(" + width + "," + height + ")";
+	}
 }

@@ -189,7 +189,7 @@ public class GameViewManager {
 			Tuple2<Integer, MapData> tuple = getUpperMapdata(curMapData);
 			staticSetView(tuple.value2.coor, 0, 0, tuple.value2.width * Res.CUBE_SIZE * tuple.value1,
 					tuple.value2.height * Res.CUBE_SIZE * tuple.value1, 1f, 0);
-
+			System.out.println();
 		}
 
 		// 调整group绘制次序

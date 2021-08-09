@@ -1,5 +1,7 @@
 package com.backinfile.cube;
 
+import com.backinfile.cube.controller.GameManager;
+import com.backinfile.cube.controller.GameViewManager;
 import com.backinfile.cube.support.ReflectionUtils;
 import com.backinfile.cube.view.MainGame;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
@@ -10,6 +12,9 @@ public class DesktopLauncher {
 		if (Settings.DEV) {
 			ReflectionUtils.initTimingClass();
 		}
+
+		GameManager.instance = new GameManager();
+		GameViewManager.instance = new GameViewManager();
 
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
 		config.width = Settings.SCREEN_WIDTH;

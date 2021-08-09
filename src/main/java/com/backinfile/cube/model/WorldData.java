@@ -97,9 +97,9 @@ public class WorldData {
 			while (!confQueue.isEmpty()) {
 				MapCubeConf mapCubeConf = confQueue.pollFirst();
 				if (!Utils.isNullOrEmpty(mapCubeConf.targetCoor)) {
-					MapConfInfo target = mapConfs.get(mapCubeConf.targetCoor); // TODO
-					Log.game.info("finding {}", mapCubeConf.targetCoor);// TODO
-					if (target != null) {// TODO
+					MapConfInfo target = mapConfs.get(mapCubeConf.targetCoor);
+					Log.game.debug("finding {}", mapCubeConf.targetCoor);
+					if (target != null) {
 						MapConfInfo copy = target.getCopyWithPrefix(mapCubeConf.finalCoor);
 						mapConfs.put(mapCubeConf.finalCoor, copy);
 						confQueue.addAll(copy.confs);

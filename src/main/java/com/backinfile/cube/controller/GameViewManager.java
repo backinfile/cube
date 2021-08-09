@@ -30,11 +30,10 @@ import com.backinfile.cube.view.animation.ZoomCameraAction;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 
 public class GameViewManager {
-	public static final GameViewManager instance = new GameViewManager();
+	public static GameViewManager instance;
 
 	private static final float MainViewScale = 1.2f;
 	private static float ANI_DURATION = 0.1f;
-	private Set<CubeView> lastInView = new HashSet<>();
 
 	public void updateCubeView(History history) {
 		adjustCubeViewOwnGroup(history);
@@ -83,7 +82,6 @@ public class GameViewManager {
 			CubeView cubeView = cubeGroup.getCubeView(cube);
 			ActionUtils.moveTo(cubeView, targetX, targetY, ANI_DURATION);
 			ActionUtils.sizeTo(cubeView, cubeWidth, cubeHeight, ANI_DURATION);
-			Log.game.info("{} {},{} {},{}", cubeView.getCube(), targetX, targetY, cubeWidth, cubeHeight);
 
 			// 人物移动动画
 			if (cube instanceof Human) {
@@ -173,7 +171,6 @@ public class GameViewManager {
 	}
 
 	public void staticSetView() {
-		lastInView.clear();
 		WorldData worldData = GameManager.instance.worldData;
 		WorldStage worldStage = GameManager.instance.worldStage;
 		MapData curMapData = worldData.getHumanMapData();
@@ -230,7 +227,6 @@ public class GameViewManager {
 		float cubeWidth = width / mapData.width;
 		float cubeHeight = height / mapData.height;
 		for (CubeView cubeView : worldStage.getCubeViews(coor)) {
-			lastInView.add(cubeView);
 			Cube cube = cubeView.getCube();
 			float targetX = cube.position.x * cubeWidth + x;
 			float targetY = cube.position.y * cubeHeight + y;

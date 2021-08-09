@@ -60,6 +60,7 @@ public class Res {
 
 	public static String DefaultWorldConfString = "";
 	public static String DefaultWorldConfStringByTiled = "";
+	private static FontCharacterCollection fontCharacterCollection = new FontCharacterCollection();
 
 	public static void init() {
 		initImage();
@@ -100,6 +101,9 @@ public class Res {
 	private static void initText() {
 		DefaultWorldConfString = Gdx.files.internal("map.txt").readString();
 		DefaultWorldConfStringByTiled = Gdx.files.internal("tiled/world.json").readString();
+
+		fontCharacterCollection.put(DefaultWorldConfString);
+		fontCharacterCollection.put(DefaultWorldConfStringByTiled);
 	}
 
 	@Timing
@@ -138,8 +142,8 @@ public class Res {
 	private static void initFont() {
 		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("font/msyh.ttc"));
 		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
-		parameter.characters += DefaultWorldConfString;
-		parameter.characters += DefaultWorldConfStringByTiled;
+		fontCharacterCollection.put(FreeTypeFontGenerator.DEFAULT_CHARS);
+		parameter.characters = fontCharacterCollection.getAll();
 
 //		parameter.size = 12;
 //		DefaultFontSmallSamll = generator.generateFont(parameter);

@@ -26,7 +26,7 @@ import com.backinfile.cube.support.Utils;
 import com.backinfile.cube.view.WorldStage;
 
 public class GameManager {
-	public static final GameManager instance = new GameManager();
+	public static GameManager instance;
 
 	public WorldData worldData;
 	public WorldStage worldStage;
@@ -57,38 +57,17 @@ public class GameManager {
 			}
 		}
 
+		firstEnterMapPosition.clear();
 		firstEnterMapPosition.put(firstMapData.coor, human.originPosition);
+		enableController = true;
+		histories.clear();
 	}
 
 	public void resetGame() {
-		MapData humanMapData = worldData.getHumanMapData();
-
-		// 检查是否是可以重置的房间，临时用有没有锁来判定
-		boolean hasLock = false;
-		for (Cube cube : humanMapData.cubeMap.getUnitList()) {
-			if (cube instanceof Lock) {
-				hasLock = true;
-				break;
-			}
-		}
-		if (!hasLock) {
-			return;
-		}
-		List<Movement> movements = new ArrayList<>();
-
-		for (Cube cube : humanMapData.cubeMap.getUnitList()) {
-			Position targetPosition;
-			if (cube instanceof Player) {
-				targetPosition = firstEnterMapPosition.get(humanMapData.coor);
-			} else {
-				targetPosition = cube.originPosition;
-			}
-			if (!cube.position.equals(targetPosition)) {
-				movements.add(new Movement(cube, targetPosition));
-			}
-		}
-		lastHumanMove.set(0, 0);
-		doMovePosition(movements, true);
+		init();
+		worldStage.clear();
+		worldStage.init();
+		GameViewManager.instance.staticSetView();
 	}
 
 	public void undo() {

@@ -26,7 +26,7 @@ public class WorldStage extends Stage {
 
 	private Group cubeGroupRoot;
 	private TextField tipText;
-	private Map<String, CubeViewGroup> viewGroups = new HashMap<>();
+	private Map<String, CubeViewGroup> viewGroups;
 
 	public WorldStage(Viewport viewport) {
 		super(viewport);
@@ -35,7 +35,9 @@ public class WorldStage extends Stage {
 	}
 
 	@Timing("world stage init")
-	private void init() {
+	public void init() {
+		viewGroups = new HashMap<>();
+
 		// 初始化方块
 		cubeGroupRoot = new Group();
 		cubeGroupRoot.setSize(this.getWidth(), this.getHeight());
@@ -164,6 +166,11 @@ public class WorldStage extends Stage {
 			}
 		}
 		return null;
+	}
+
+	@Override
+	public void clear() {
+		super.clear();
 	}
 
 	@Override

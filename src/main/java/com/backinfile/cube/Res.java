@@ -99,8 +99,8 @@ public class Res {
 
 	@Timing
 	private static void initText() {
-		DefaultWorldConfString = Gdx.files.internal("map.txt").readString();
-		DefaultWorldConfStringByTiled = Gdx.files.internal("tiled/world.json").readString();
+		DefaultWorldConfString = ""; // Gdx.files.internal("map.txt").readString();
+		DefaultWorldConfStringByTiled = Gdx.files.local("assets/tiled/world.json").readString();
 
 		fontCharacterCollection.put(DefaultWorldConfString);
 		fontCharacterCollection.put(DefaultWorldConfStringByTiled);

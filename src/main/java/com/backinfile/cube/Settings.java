@@ -1,7 +1,7 @@
 package com.backinfile.cube;
 
 public class Settings {
-	public static final boolean DEV = true; // 开发版本
+	public static final boolean DEV = false; // 开发版本
 	public static final boolean DEBUG = true;
 
 	public static final int SCREEN_WIDTH = 800;

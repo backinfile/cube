@@ -1,10 +1,13 @@
 package com.backinfile.cube.controller;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 
 import com.backinfile.cube.Log;
 import com.backinfile.cube.Res;
@@ -24,6 +27,7 @@ import com.backinfile.cube.model.cubes.Wall;
 import com.backinfile.cube.support.SysException;
 import com.backinfile.cube.support.TimerQueue;
 import com.backinfile.cube.support.Timing;
+import com.backinfile.cube.support.Tuple2;
 import com.backinfile.cube.support.Utils;
 import com.backinfile.cube.view.WorldStage;
 
@@ -210,7 +214,7 @@ public class GameManager {
 					Position startPosition2 = passPosList.get(index);
 					ArrayList<Position> newPassPosList = Utils.subList(passPosList, 0, index);
 					MapCube mapCube = (MapCube) getCube(startPosition2);
-					Position edgePos = getEdgePos(mapCube.getTargetCoor(), d);
+					Position edgePos = getEdgePos(mapCube.getTargetCoor(), d, newPassPosList.get(index - 1));
 					if (edgePos != null) {
 						newPassPosList.add(edgePos);
 						if (isPosEmpty(edgePos)) { // 方块入口为空，直接移动过去
@@ -315,27 +319,85 @@ public class GameManager {
 
 	// 查找地图边界上的空位
 	private Position getEdgePos(String worldCoor, Vector d) {
-		MapData mapData = worldData.getMapData(worldCoor);
-		Position position = new Position();
-		position.worldCoor = worldCoor;
-		if (d.x == 0) {
-			for (int x = 0; x < mapData.width; x++) {
-				position.setPosition(x, d.y < 0 ? mapData.height - 1 : 0);
-				Cube cube = mapData.cubeMap.get(position);
-				if (cube == null || cube.isEmpty() || cube.isPushable()) {
-					return position;
-				}
-			}
+		return getEdgePos(worldCoor, d, 0f);
+	}
+
+	// 查找地图边界上的空位
+	private Position getEdgePos(String worldCoor, Vector d, Position lastPosition) {
+		MapData mapData = worldData.getMapData(lastPosition.worldCoor);
+		if (d.x == 0) {// 向上或向下
+			return getEdgePos(worldCoor, d, lastPosition.x / (float) mapData.width);
 		} else {
-			for (int y = 0; y < mapData.width; y++) {
-				position.setPosition(d.x < 0 ? mapData.height - 1 : 0, y);
-				Cube cube = mapData.cubeMap.get(position);
-				if (cube == null || cube.isEmpty() || cube.isPushable()) {
-					return position;
-				}
+			return getEdgePos(worldCoor, d, lastPosition.y / (float) mapData.height);
+		}
+	}
+
+	private List<Position> getAllEdgePos(String worldCoor, Vector d) {
+		MapData mapData = worldData.getMapData(worldCoor);
+		Queue<Position> toFindEdgeQueue = new LinkedList<>();
+		List<Position> edgePositions = new ArrayList<>();
+
+		if (d.x == 0) { // 向上或向下
+			for (int x = 0; x < mapData.width; x++) {
+				toFindEdgeQueue.add(new Position(x, d.y < 0 ? mapData.height - 1 : 0, worldCoor));
+			}
+		} else { // 向左或向右
+			for (int y = 0; y < mapData.height; y++) {
+				toFindEdgeQueue.add(new Position(d.x < 0 ? mapData.width - 1 : 0, y, worldCoor));
 			}
 		}
-		return null;
+
+		while (!toFindEdgeQueue.isEmpty()) {
+			Position pos = toFindEdgeQueue.poll();
+			Cube cube = getCube(pos);
+			if (cube == null) {
+				edgePositions.add(pos);
+				continue;
+			}
+			if (cube.isEmpty() || cube.isPushable()) {
+				edgePositions.add(cube.position);
+				continue;
+			}
+			if (cube instanceof MapCube) {
+				List<Position> inner = getAllEdgePos(((MapCube) cube).getTargetCoor(), d);
+				toFindEdgeQueue.addAll(inner);
+			}
+		}
+
+		return edgePositions;
+	}
+
+	// 查找地图边界上的空位
+	private Position getEdgePos(String worldCoor, Vector d, float positionOnEdge) {
+		MapData mapData = worldData.getMapData(worldCoor);
+
+		List<Position> posiblePosition = getAllEdgePos(worldCoor, d);
+		if (posiblePosition.isEmpty()) {
+			return null;
+		}
+
+		Log.game.info("get edge pos {} {}", posiblePosition, positionOnEdge);
+		Position retPostion = posiblePosition.stream().map(pos -> {
+			float distence = 0f;
+			if (d.x == 0) {
+				distence = Math.abs(pos.x / (float) mapData.width - positionOnEdge);
+			} else {
+				distence = Math.abs(pos.y / (float) mapData.height - positionOnEdge);
+			}
+			return new Tuple2<>(pos, distence);
+		}).sorted(new Comparator<Tuple2<Position, Float>>() {
+			@Override
+			public int compare(Tuple2<Position, Float> o1, Tuple2<Position, Float> o2) {
+				return Float.compare(o1.value2, o2.value2);
+			}
+		}).findFirst().get().value1;
+
+		Cube cube = getCube(retPostion);
+		if (cube != null) {
+			return cube.position;
+		}
+
+		return retPostion;
 	}
 
 	public void checkFitKey() {

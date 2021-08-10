@@ -211,7 +211,10 @@ public class GameViewManager {
 	}
 
 	private void staticSetView(String coor, float x, float y, float width, float height, float alpha, int layer) {
-		Log.game.info("show coor:{} x:{} y:{} width:{} height:{}", coor, x, y, width, height);
+		if (layer <= -10) {
+			return;
+		}
+		Log.game.debug("show coor:{} layer:{} x:{} y:{} width:{} height:{}", coor, layer, x, y, width, height);
 		WorldData worldData = GameManager.instance.worldData;
 		WorldStage worldStage = GameManager.instance.worldStage;
 

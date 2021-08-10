@@ -348,7 +348,7 @@ public class GameManager {
 					Lock lock = (Lock) cube;
 					// 当开着的开关被占用时，维持开着的状态
 					List<Cube> all = mapData.cubeMap.getAll(lock.position.x, lock.position.y);
-					if (all.stream().anyMatch(c -> !c.isEmpty())) {
+					if (all.stream().anyMatch(c -> c != lock && !c.isEmpty())) {
 						lock.setLocked(false);
 					} else {
 						lock.setLocked(true);

@@ -37,6 +37,7 @@ public class GameViewManager {
 
 	public void updateCubeView(History history) {
 		adjustCubeViewOwnGroup(history);
+
 		WorldStage worldStage = GameManager.instance.worldStage;
 		WorldData worldData = GameManager.instance.worldData;
 
@@ -189,7 +190,6 @@ public class GameViewManager {
 			Tuple2<Integer, MapData> tuple = getUpperMapdata(curMapData);
 			staticSetView(tuple.value2.coor, 0, 0, tuple.value2.width * Res.CUBE_SIZE * tuple.value1,
 					tuple.value2.height * Res.CUBE_SIZE * tuple.value1, 1f, 0);
-			System.out.println();
 		}
 
 		// 调整group绘制次序
@@ -204,14 +204,14 @@ public class GameViewManager {
 					cubeGroup.getWidth() * MainViewScale * (worldStage.getWidth() / worldStage.getHeight()),
 					cubeGroup.getHeight() * MainViewScale);
 			camera.position.set(savePos.x + cubeGroup.getWidth() / 2, savePos.y + cubeGroup.getHeight() / 2, 0);
-			Log.game.debug("{}, {}, {}", camera.position, camera.viewportWidth, camera.viewportHeight);
+			Log.game.info("{}, {}, {}", camera.position, camera.viewportWidth, camera.viewportHeight);
 			camera.update();
 			worldStage.getBatch().setProjectionMatrix(camera.combined);
 		}
 	}
 
 	private void staticSetView(String coor, float x, float y, float width, float height, float alpha, int layer) {
-//		Log.game.info("show coor:{} x:{} y:{} width:{} height:{}", coor, x, y, width, height);
+		Log.game.info("show coor:{} x:{} y:{} width:{} height:{}", coor, x, y, width, height);
 		WorldData worldData = GameManager.instance.worldData;
 		WorldStage worldStage = GameManager.instance.worldStage;
 

@@ -17,7 +17,10 @@ import com.backinfile.cube.model.cubes.Lock;
 import com.backinfile.cube.model.cubes.MapCube;
 import com.backinfile.cube.model.cubes.Rock;
 import com.backinfile.cube.model.cubes.Wall;
+import com.backinfile.cube.support.SysException;
+import com.backinfile.cube.support.Tuple2;
 import com.backinfile.cube.support.Utils;
+import com.badlogic.gdx.audio.Sound;
 
 public class WorldData {
 	private List<MapData> datas = new ArrayList<>();
@@ -50,6 +53,9 @@ public class WorldData {
 			if (data.coor.equals(coor)) {
 				return data;
 			}
+		}
+		if (coor.equals("main|level1")) {
+
 		}
 		Log.game.error("search coor:{} not exist!", coor);
 		return null;
@@ -87,23 +93,31 @@ public class WorldData {
 			String oriCoor = mapConf.getString("name");
 			if (!Utils.isNullOrEmpty(oriCoor)) {
 				mapConfs.put(oriCoor, MapConfInfo.parseMapCubes(mapConf));
+				Log.level.info("read {}", oriCoor);
 			}
 		}
 		// 复制所需地图
 		for (String mapCoor : new ArrayList<>(mapConfs.keySet())) {
 			MapConfInfo mapConf = mapConfs.get(mapCoor);
-			LinkedList<MapCubeConf> confQueue = new LinkedList<>();
-			confQueue.addAll(mapConf.getAllMapCubeConf());
+			LinkedList<Tuple2<String, List<MapCubeConf>>> confQueue = new LinkedList<>();
+			confQueue.add(new Tuple2<String, List<MapCubeConf>>(mapCoor, mapConf.getAllMapCubeConf()));
 			while (!confQueue.isEmpty()) {
-				MapCubeConf mapCubeConf = confQueue.pollFirst();
-				if (!Utils.isNullOrEmpty(mapCubeConf.targetCoor)) {
-					MapConfInfo target = mapConfs.get(mapCubeConf.targetCoor);
-					Log.game.debug("finding {}", mapCubeConf.targetCoor);
-					if (target != null) {
-						MapConfInfo copy = target.getCopyWithPrefix(mapCubeConf.finalCoor);
-						mapConfs.put(mapCubeConf.finalCoor, copy);
-						confQueue.addAll(copy.confs);
+				Tuple2<String, List<MapCubeConf>> tuple = confQueue.poll();
+				List<MapCubeConf> array = tuple.value2;
+				String prefix = tuple.value1;
+				for (MapCubeConf mapCubeConf : array) {
+					if (!mapCubeConf.copy) {
+						continue;
 					}
+					Log.level.info("{},{},{}->{}", mapCubeConf.x, mapCubeConf.y, prefix, mapCubeConf.finalCoor);
+					MapConfInfo target = mapConfs.get(mapCubeConf.targetCoor);
+					if (target == null) {
+						throw new SysException("not find coor: " + mapCubeConf.targetCoor);
+					}
+					MapConfInfo copy = target.getCopyWithPrefix(prefix);
+					mapConfs.put(copy.mapCoor, copy);
+//					Log.level.info("{} + {} -> {}", prefix, mapCubeConf.targetCoor, copy.mapCoor);
+					confQueue.add(new Tuple2<String, List<MapCubeConf>>(copy.mapCoor, copy.confs));
 				}
 			}
 		}
@@ -174,17 +188,19 @@ public class WorldData {
 	private static class MapCubeConf {
 		public int x;
 		public int y;
-		public String oriCoorStr = ""; // 原始配置
-		public String targetCoor = ""; // 进行复制的目标
-		public String finalCoor = ""; // 最终坐标
+		public String oriCoorStr = ""; // 原始配置字符串
+		public String targetCoor = ""; // 要进行复制的目标，指原本就有的mapcube（不变）
+		public String finalCoor = ""; // 最终指向的map, 父节点+targetCoor
+		public boolean copy = false;
 
-		public MapCubeConf copyWithPrefix(String prefix) {
+		public MapCubeConf copy(String parentCoor) {
 			MapCubeConf conf = new MapCubeConf();
 			conf.x = this.x;
 			conf.y = this.y;
 			conf.oriCoorStr = this.oriCoorStr;
 			conf.targetCoor = this.targetCoor;
-			conf.finalCoor = prefix + this.targetCoor;
+			conf.finalCoor = parentCoor + "|" + conf.targetCoor;
+			conf.copy = true;
 			return conf;
 		}
 	}
@@ -230,12 +246,12 @@ public class WorldData {
 				conf.x = Integer.valueOf(values[i + 0].trim());
 				conf.y = Integer.valueOf(values[i + 1].trim());
 				conf.oriCoorStr = values[i + 2].trim();
-				if (conf.oriCoorStr.contains("#")) {
-					conf.targetCoor = conf.oriCoorStr.replaceAll("\\#", "");
-					conf.finalCoor = conf.oriCoorStr.replaceAll("\\#", mapInfo.mapCoor);
+				conf.targetCoor = conf.oriCoorStr.replaceAll("\\#", "");
+				conf.copy = conf.oriCoorStr.contains("#");
+				if (conf.copy) {
+					conf.finalCoor = mapInfo.mapCoor + "|" + conf.targetCoor;
 				} else {
-					conf.targetCoor = "";
-					conf.finalCoor = conf.oriCoorStr;
+					conf.finalCoor = conf.targetCoor;
 				}
 				mapInfo.confs.add(conf);
 			}
@@ -244,11 +260,11 @@ public class WorldData {
 
 		public MapConfInfo getCopyWithPrefix(String prefix) {
 			MapConfInfo thisCopy = new MapConfInfo();
-			thisCopy.mapCoor = prefix + this.mapCoor;
+			thisCopy.mapCoor = prefix + "|" + this.mapCoor;
 			thisCopy.mapConf = this.mapConf;
 			thisCopy.size.set(this.size);
 			for (MapCubeConf conf : this.confs) {
-				thisCopy.confs.add(conf.copyWithPrefix(prefix));
+				thisCopy.confs.add(conf.copy(thisCopy.mapCoor));
 			}
 			return thisCopy;
 		}

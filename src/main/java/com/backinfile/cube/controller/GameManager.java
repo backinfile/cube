@@ -61,7 +61,7 @@ public class GameManager {
 			}
 		}
 		if (humanCnt != 1) {
-			Log.game.error("humanCnt=" + humanCnt);
+			throw new SysException("humanCnt=" + humanCnt);
 		}
 
 		firstEnterMapPosition.clear();
@@ -347,11 +347,11 @@ public class GameManager {
 				} else if (cube instanceof Lock) {
 					Lock lock = (Lock) cube;
 					// 当开着的开关被占用时，维持开着的状态
-					if (!lock.isLocked()) {
-						List<Cube> all = mapData.cubeMap.getAll(lock.position.x, lock.position.y);
-						if (!all.stream().anyMatch(c -> !c.isEmpty())) {
-							lock.setLocked(true);
-						}
+					List<Cube> all = mapData.cubeMap.getAll(lock.position.x, lock.position.y);
+					if (all.stream().anyMatch(c -> !c.isEmpty())) {
+						lock.setLocked(false);
+					} else {
+						lock.setLocked(true);
 					}
 				}
 			}
@@ -371,6 +371,7 @@ public class GameManager {
 	}
 
 	private boolean testMapAllKeyFited(MapData mapData) {
+		boolean test = true;
 		for (Cube cube : mapData.cubeMap.getUnitList()) {
 			if (cube instanceof FixedKey) {
 				FixedKey fixedKey = (FixedKey) cube;
@@ -394,16 +395,16 @@ public class GameManager {
 					}
 				}
 				if (!fixedKey.isFitKey()) {
-					return false;
+					test = false;
 				}
 			} else if (cube instanceof MapCube) {
 				MapData targetMapData = worldData.getMapData(((MapCube) cube).getTargetCoor());
 				if (!testMapAllKeyFited(targetMapData)) {
-					return false;
+					test = false;
 				}
 			}
 		}
-		return true;
+		return test;
 	}
 
 	private boolean isPosEmpty(Position position) {

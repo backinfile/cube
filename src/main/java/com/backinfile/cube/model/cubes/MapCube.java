@@ -41,4 +41,9 @@ public class MapCube extends Cube {
 	public boolean canEnter() {
 		return enterable;
 	}
+
+	@Override
+	public String toString() {
+		return super.toString() + ":" + getTargetCoor();
+	}
 }

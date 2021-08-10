@@ -128,7 +128,7 @@ public class Res {
 
 		CUBE_FLOWER = getDrawable(newColorPixmap(CUBE_SIZE, CUBE_SIZE, Color.LIGHT_GRAY));
 		CUBE_WALL = getDrawable(newWallImage(CUBE_SIZE));
-		CUBE_ROCK = getDrawable(newRockImage(CUBE_SIZE));
+		CUBE_ROCK = getDrawable(newWallImage(CUBE_SIZE));
 		CUBE_HUMAN = getDrawable(newHumanImage(CUBE_SIZE));
 		CUBE_HUMAN_EYE = getDrawable(newHumanEyeImage(CUBE_SIZE));
 		CUBE_ALPHA_MASK = getDrawable(newColorPixmap(CUBE_SIZE, CUBE_SIZE, new Color(1, 1, 1, 0.5f)));

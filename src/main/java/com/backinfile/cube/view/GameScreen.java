@@ -1,5 +1,6 @@
 package com.backinfile.cube.view;
 
+import com.backinfile.cube.Log;
 import com.backinfile.cube.Settings;
 import com.backinfile.cube.controller.GameManager;
 import com.backinfile.cube.controller.GamePlayInputProcessor;
@@ -52,13 +53,15 @@ public class GameScreen implements Screen {
 
 	@Override
 	public void pause() {
+		Log.game.info("pause");
 	}
 
 	@Override
 	public void resume() {
-		GameManager.instance.timerQueue.applyTimer(0, () -> {
+		GameManager.instance.timerQueue.applyTimer(5, () -> {
 			GameViewManager.instance.staticSetView();
 		});
+		Log.game.info("resume");
 	}
 
 	@Override

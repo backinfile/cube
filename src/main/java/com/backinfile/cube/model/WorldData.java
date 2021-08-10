@@ -54,9 +54,6 @@ public class WorldData {
 				return data;
 			}
 		}
-		if (coor.equals("main|level1")) {
-
-		}
 		Log.game.error("search coor:{} not exist!", coor);
 		return null;
 	}

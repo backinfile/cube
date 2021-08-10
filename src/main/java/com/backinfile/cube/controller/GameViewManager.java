@@ -204,7 +204,7 @@ public class GameViewManager {
 					cubeGroup.getWidth() * MainViewScale * (worldStage.getWidth() / worldStage.getHeight()),
 					cubeGroup.getHeight() * MainViewScale);
 			camera.position.set(savePos.x + cubeGroup.getWidth() / 2, savePos.y + cubeGroup.getHeight() / 2, 0);
-			Log.game.info("{}, {}, {}", camera.position, camera.viewportWidth, camera.viewportHeight);
+			Log.game.debug("{}, {}, {}", camera.position, camera.viewportWidth, camera.viewportHeight);
 			camera.update();
 			worldStage.getBatch().setProjectionMatrix(camera.combined);
 		}

@@ -58,6 +58,9 @@ public class Res {
 	public static BitmapFont DefaultFontLarge;
 	public static BitmapFont DefaultFont;
 
+	public static String STR_TUTORIAL = "WASD to move, Z to undo";
+	public static String STR_THANKS = "Thanks for playing!";
+
 	public static String DefaultWorldConfString = "";
 	public static String DefaultWorldConfStringByTiled = "";
 	private static FontCharacterCollection fontCharacterCollection = new FontCharacterCollection();
@@ -140,7 +143,8 @@ public class Res {
 
 	@Timing
 	private static void initFont() {
-		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("font/msyh.ttc"));
+		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
+				Gdx.files.internal("font/JetBrainsMono-VariableFont_wght.ttf"));
 		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
 		fontCharacterCollection.put(FreeTypeFontGenerator.DEFAULT_CHARS);
 		parameter.characters = fontCharacterCollection.getAll();
@@ -194,7 +198,7 @@ public class Res {
 
 	private static Pixmap newHumanImage(int size) {
 		Pixmap pixmap = new Pixmap(size, size, Format.RGBA8888);
-		pixmap.setColor(new Color(0.8f, 0.1f, 0.1f, 1f));
+		pixmap.setColor(new Color(0.7f, 0.1f, 0.1f, 1f));
 		pixmap.fillRectangle(CUBE_BORDER_WIDTH_THIN, CUBE_BORDER_WIDTH_THIN, CUBE_SIZE - CUBE_BORDER_WIDTH_THIN * 2,
 				CUBE_SIZE - CUBE_BORDER_WIDTH_THIN * 2);
 		return pixmap;

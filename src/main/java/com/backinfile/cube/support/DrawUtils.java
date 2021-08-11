@@ -43,4 +43,18 @@ public class DrawUtils {
 		pixmap.fillRectangle(lineWidth, height - lineWidth, width, lineWidth);
 		pixmap.fillRectangle(width - lineWidth, lineWidth, lineWidth, height - lineWidth * 2);
 	}
+
+	public static void drawBorder(Pixmap pixmap, int edgeEmptyWidth, int lineWidth) {
+		int width = pixmap.getWidth();
+		int height = pixmap.getHeight();
+		pixmap.fillRectangle(edgeEmptyWidth, edgeEmptyWidth + lineWidth, width - edgeEmptyWidth * 2, lineWidth);
+		pixmap.fillRectangle(edgeEmptyWidth, height - edgeEmptyWidth, lineWidth,
+				height - edgeEmptyWidth * 2 - lineWidth);
+
+		pixmap.fillRectangle(edgeEmptyWidth + lineWidth, height - edgeEmptyWidth,
+				width - edgeEmptyWidth * 2 - lineWidth * 2, lineWidth);
+		pixmap.fillRectangle(width - lineWidth - edgeEmptyWidth, lineWidth - edgeEmptyWidth, lineWidth,
+				height - lineWidth - edgeEmptyWidth * 2);
+	}
+
 }

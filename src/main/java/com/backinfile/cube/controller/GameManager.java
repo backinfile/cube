@@ -1,7 +1,6 @@
 package com.backinfile.cube.controller;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -29,15 +28,16 @@ import com.backinfile.cube.support.TimerQueue;
 import com.backinfile.cube.support.Timing;
 import com.backinfile.cube.support.Tuple2;
 import com.backinfile.cube.support.Utils;
+import com.backinfile.cube.view.UIStage;
 import com.backinfile.cube.view.WorldStage;
 import com.backinfile.cube.view.animation.ShakeAction;
-import com.backinfile.cube.view.animation.ShakeCameraAction;
 
 public class GameManager {
 	public static GameManager instance;
 
 	public WorldData worldData;
 	public WorldStage worldStage;
+	public UIStage uiStage;
 	public TimerQueue timerQueue;
 
 	public Player human;

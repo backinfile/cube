@@ -9,9 +9,7 @@ public class MapData {
 	public int width;
 	public int height;
 	public MMap<Cube> cubeMap; // 方块
-	public String view = "";
-	public String viewAll = "";
-	public String tipText = "";
+	public String tip = "";
 	public MapCube preCube = null;
 	public MapData preMapData = null;
 

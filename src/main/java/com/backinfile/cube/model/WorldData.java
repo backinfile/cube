@@ -20,7 +20,6 @@ import com.backinfile.cube.model.cubes.Wall;
 import com.backinfile.cube.support.SysException;
 import com.backinfile.cube.support.Tuple2;
 import com.backinfile.cube.support.Utils;
-import com.badlogic.gdx.audio.Sound;
 
 public class WorldData {
 	private List<MapData> datas = new ArrayList<>();
@@ -126,6 +125,7 @@ public class WorldData {
 			worldData.datas.add(mapData);
 			mapData.initMap((int) size.x, (int) size.y);
 			mapData.coor = mapCoor;
+			mapData.tip = getPropValue(mapConf, "tip");
 			List<Integer> dataArray = JSONObject.parseArray(mapConf.getString("data"), Integer.class);
 			for (int x = 0; x < size.x; x++) {
 				for (int y = 0; y < size.y; y++) {

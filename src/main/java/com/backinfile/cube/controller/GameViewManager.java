@@ -23,6 +23,7 @@ import com.backinfile.cube.model.cubes.Wall;
 import com.backinfile.cube.support.ActionUtils;
 import com.backinfile.cube.support.Time2;
 import com.backinfile.cube.support.Tuple2;
+import com.backinfile.cube.support.Utils;
 import com.backinfile.cube.view.CubeView;
 import com.backinfile.cube.view.CubeViewGroup;
 import com.backinfile.cube.view.WorldStage;
@@ -184,7 +185,11 @@ public class GameViewManager {
 		WorldStage worldStage = GameManager.instance.worldStage;
 		MapData curMapData = worldData.getHumanMapData();
 
-		worldStage.setTipText(false, "");
+		if (!Utils.isNullOrEmpty(curMapData.tip)) {
+			GameManager.instance.uiStage.setTipText(true, curMapData.tip);
+		} else {
+			GameManager.instance.uiStage.setTipText(false, "");
+		}
 
 		// 重置group
 		for (MapData mapData : worldData.getMapDatas()) {
@@ -259,6 +264,7 @@ public class GameViewManager {
 				cubeView.setHumanEyeOffset(human.lastMove.x * cubeWidth / 10, human.lastMove.y * cubeHeight / 10, 0);
 			} else if (cube instanceof Lock) {
 				cubeView.setLocked(((Lock) cube).isLocked());
+				group.addActorAt(0, cubeView);
 			}
 		}
 	}

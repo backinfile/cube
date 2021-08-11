@@ -15,6 +15,7 @@ public class GameScreen implements Screen {
 
 	private TimerQueue timerQueue;
 	private WorldStage worldStage;
+	private UIStage uiStage;
 
 	@Override
 	public void show() {
@@ -26,6 +27,11 @@ public class GameScreen implements Screen {
 			worldStage = new WorldStage(new ExtendViewport(Settings.SCREEN_WIDTH, Settings.SCREEN_HEIGHT));
 			Gdx.input.setInputProcessor(new GamePlayInputProcessor(GameManager.instance));
 			GameManager.instance.worldStage = worldStage;
+		}
+
+		if (uiStage == null) {
+			uiStage = new UIStage(new ExtendViewport(Settings.SCREEN_WIDTH, Settings.SCREEN_HEIGHT));
+			GameManager.instance.uiStage = uiStage;
 		}
 
 		GameManager.instance.timerQueue.applyTimer(0, () -> {
@@ -41,8 +47,17 @@ public class GameScreen implements Screen {
 			timerQueue.update();
 		}
 		if (worldStage != null) {
-			worldStage.act();
+			worldStage.act(delta);
+		}
+		if (uiStage != null) {
+			uiStage.act(delta);
+		}
+
+		if (worldStage != null) {
 			worldStage.draw();
+		}
+		if (uiStage != null) {
+			uiStage.draw();
 		}
 	}
 
@@ -54,7 +69,7 @@ public class GameScreen implements Screen {
 	@Override
 	public void pause() {
 		Log.game.info("pause");
-	}   
+	}
 
 	@Override
 	public void resume() {

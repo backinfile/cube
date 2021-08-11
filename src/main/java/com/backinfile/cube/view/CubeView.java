@@ -3,6 +3,7 @@ package com.backinfile.cube.view;
 import java.util.List;
 
 import com.backinfile.cube.Res;
+import com.backinfile.cube.Settings;
 import com.backinfile.cube.controller.GameManager;
 import com.backinfile.cube.model.cubes.Human;
 import com.backinfile.cube.model.cubes.Lock;
@@ -10,6 +11,7 @@ import com.backinfile.cube.model.cubes.Cube;
 import com.backinfile.cube.model.cubes.MapCube;
 import com.backinfile.cube.model.cubes.Rock;
 import com.backinfile.cube.model.cubes.Wall;
+import com.backinfile.cube.support.Time2;
 import com.backinfile.cube.support.Utils;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -23,6 +25,7 @@ public class CubeView extends Group {
 
 	private Image mainImage;
 	private Image borderImage;
+	private Image whiteBorderImage;
 	private Image[] borderAsideImages;
 	private Image humanEyeImage;
 	private Image lockImage;
@@ -59,8 +62,8 @@ public class CubeView extends Group {
 			setLocked(((Lock) cube).isLocked());
 		}
 		if (!(cube instanceof Wall) && cube.isPushable()) {
-			borderImage = new Image(Res.CUBE_BORDER_WHITE);
-			addActor(borderImage);
+			whiteBorderImage = new Image(Res.CUBE_BORDER_WHITE);
+			addActor(whiteBorderImage);
 		}
 		if (cube instanceof MapCube) {
 			mainImage = new Image(Res.CUBE_BORDER_BLUE);
@@ -116,6 +119,7 @@ public class CubeView extends Group {
 				actor.setSize(width, height);
 			}
 		}
+
 	}
 
 	public Cube getCube() {
@@ -139,6 +143,14 @@ public class CubeView extends Group {
 	@Override
 	public void act(float delta) {
 		super.act(delta);
+
+		if (Settings.BORDER_BREATH) {
+			if (whiteBorderImage != null) {
+				long timeUnit = Time2.SEC * 4;
+				float percent = (Time2.getCurMillis() % timeUnit) / (float) timeUnit;
+				whiteBorderImage.getColor().a = 0.4f + 0.6f * Math.abs(percent * 2 - 1);
+			}
+		}
 	}
 
 	@Override

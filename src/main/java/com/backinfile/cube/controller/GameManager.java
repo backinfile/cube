@@ -30,6 +30,8 @@ import com.backinfile.cube.support.Timing;
 import com.backinfile.cube.support.Tuple2;
 import com.backinfile.cube.support.Utils;
 import com.backinfile.cube.view.WorldStage;
+import com.backinfile.cube.view.animation.ShakeAction;
+import com.backinfile.cube.view.animation.ShakeCameraAction;
 
 public class GameManager {
 	public static GameManager instance;
@@ -72,6 +74,8 @@ public class GameManager {
 		firstEnterMapPosition.put(human.position.worldCoor, human.originPosition);
 		enableController = true;
 		histories.clear();
+
+		checkFitKey();
 	}
 
 	public void resetGame() {
@@ -106,12 +110,45 @@ public class GameManager {
 		List<Integer> directions = new ArrayList<Integer>();
 		MapData mapData = worldData.getMapData(position.worldCoor);
 		for (int i = 0; i < dx8.length; i++) {
-			Position translated = position.getTranslated(dx8[i], dy8[i]);
+			Vector d = new Vector(dx8[i], dy8[i]);
+			Position translated = position.getTranslated(d);
 			if (mapData.cubeMap.inMap(translated.x, translated.y)) {
 				Cube sideCube = mapData.cubeMap.get(translated);
 				if (sideCube != null && sideCube instanceof Wall) {
 					directions.add(i);
 				}
+			} else if (mapData.preCube != null) { // 与相邻方块内部的方块相邻
+				MapCube preCube = mapData.preCube;
+				MapData preMapData = mapData.preMapData;
+				Position nextCubePostion = new Position((translated.x + mapData.width) % mapData.width,
+						(translated.y + mapData.height) % mapData.height);
+				Vector preD = new Vector();
+				{
+					if (!mapData.cubeMap.inMap(position.x + (int) d.x, position.y)) {
+						preD.x = d.x;
+					}
+					if (!mapData.cubeMap.inMap(position.x, position.y + (int) d.y)) {
+						preD.y = d.y;
+					}
+				}
+				Position preNextCubePosition = preCube.position.getTranslated(preD);
+				if (preMapData.cubeMap.inMap(preNextCubePosition.x, preNextCubePosition.y)) {
+					Cube preNextCube = preMapData.cubeMap.get(preNextCubePosition);
+					if (preNextCube != null && preNextCube instanceof MapCube) {
+						MapCube preNextMapCube = (MapCube) preNextCube;
+						MapData preNextMapData = worldData.getMapData(preNextMapCube.getTargetCoor());
+						if (!preNextMapData.isSameSize(mapData)) {
+							continue;
+						}
+						Cube preNextMapDataInnerCube = preNextMapData.cubeMap.get(nextCubePostion);
+						if (preNextMapDataInnerCube != null && preNextMapDataInnerCube instanceof Wall) {
+							directions.add(i);
+							Log.game.debug("near {} from {} in {}", preNextMapDataInnerCube.position, position,
+									preMapData.coor);
+						}
+					}
+				}
+
 			}
 		}
 		return directions;
@@ -123,6 +160,10 @@ public class GameManager {
 		passPosList.add(human.position);
 		if (testCubeMove(human.position, lastHumanMove, passPosList)) {
 			doMovePosition(passPosList);
+		} else {
+//			worldStage.addAction(new ShakeCameraAction(0.05f, 2, true, true));
+			worldStage.getHumanCubeView().addAction(new ShakeAction(0.05f, true, true));
+			GameViewManager.instance.moveHumanEye(lastHumanMove, 0.05f);
 		}
 		Log.game.info("move {} human:{}", lastHumanMove, human.position);
 	}
@@ -242,7 +283,8 @@ public class GameManager {
 					}
 					ArrayList<Position> newPassPosList = Utils.subList(passPosList, 0, index);
 					MapCube mapCube = (MapCube) getCube(startPosition2);
-					Position edgePos = getEdgePos(mapCube.getTargetCoor(), d.getOppsite());
+					Position edgePos = getEdgePos(mapCube.getTargetCoor(), d.getOppsite(),
+							newPassPosList.get(index - 1));
 					if (edgePos != null) {
 						newPassPosList.add(startPosition2);
 						newPassPosList.add(nextPosition2);
@@ -317,21 +359,6 @@ public class GameManager {
 		return cube.position;
 	}
 
-	// 查找地图边界上的空位
-	private Position getEdgePos(String worldCoor, Vector d) {
-		return getEdgePos(worldCoor, d, 0f);
-	}
-
-	// 查找地图边界上的空位
-	private Position getEdgePos(String worldCoor, Vector d, Position lastPosition) {
-		MapData mapData = worldData.getMapData(lastPosition.worldCoor);
-		if (d.x == 0) {// 向上或向下
-			return getEdgePos(worldCoor, d, lastPosition.x / (float) mapData.width);
-		} else {
-			return getEdgePos(worldCoor, d, lastPosition.y / (float) mapData.height);
-		}
-	}
-
 	private List<Position> getAllEdgePos(String worldCoor, Vector d) {
 		MapData mapData = worldData.getMapData(worldCoor);
 		Queue<Position> toFindEdgeQueue = new LinkedList<>();
@@ -368,23 +395,44 @@ public class GameManager {
 	}
 
 	// 查找地图边界上的空位
-	private Position getEdgePos(String worldCoor, Vector d, float positionOnEdge) {
-		MapData mapData = worldData.getMapData(worldCoor);
-
+	private Position getEdgePos(String worldCoor, Vector d, Position lastPosition) {
 		List<Position> posiblePosition = getAllEdgePos(worldCoor, d);
+		Log.game.debug("posiblePosition={} lastPosition={}", posiblePosition, lastPosition);
+		for (Position pos : new ArrayList<>(posiblePosition)) {
+			if (!lastPosition.worldCoor.equals(pos.worldCoor)) {
+				MapData lastMapData = worldData.getMapData(lastPosition.worldCoor);
+				MapData thisMapData = worldData.getMapData(pos.worldCoor);
+				if (lastMapData.preMapData != null && lastMapData.preMapData == thisMapData.preMapData) {
+					// 相同层次的方块只有size相同才允许进入
+					if (!lastMapData.isSameSize(thisMapData)) {
+						posiblePosition.remove(pos);
+						continue;
+					}
+					if (d.x == 0) {
+						if (pos.x != lastPosition.x) {
+							posiblePosition.remove(pos);
+							continue;
+						}
+					} else {
+						if (pos.y != lastPosition.y) {
+							posiblePosition.remove(pos);
+							continue;
+						}
+					}
+				}
+			}
+		}
 		if (posiblePosition.isEmpty()) {
 			return null;
 		}
 
-		Log.game.info("get edge pos {} {}", posiblePosition, positionOnEdge);
 		Position retPostion = posiblePosition.stream().map(pos -> {
-			float distence = 0f;
+			MapData innerMapData = worldData.getMapData(pos.worldCoor);
 			if (d.x == 0) {
-				distence = Math.abs(pos.x / (float) mapData.width - positionOnEdge);
+				return new Tuple2<>(pos, Math.abs((pos.x + 0.5f) / (float) innerMapData.width - 0.5f));
 			} else {
-				distence = Math.abs(pos.y / (float) mapData.height - positionOnEdge);
+				return new Tuple2<>(pos, Math.abs((pos.y + 0.5f) / (float) innerMapData.height - 0.5f));
 			}
-			return new Tuple2<>(pos, distence);
 		}).sorted(new Comparator<Tuple2<Position, Float>>() {
 			@Override
 			public int compare(Tuple2<Position, Float> o1, Tuple2<Position, Float> o2) {
@@ -414,6 +462,9 @@ public class GameManager {
 						lock.setLocked(false);
 					} else {
 						lock.setLocked(true);
+					}
+					if (Settings.OPEN_ALL_LOCK) {
+						lock.setLocked(false);
 					}
 				}
 			}

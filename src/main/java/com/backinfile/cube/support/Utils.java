@@ -2,9 +2,11 @@ package com.backinfile.cube.support;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class Utils {
 	public static final String UTF8 = "utf-8";
+	private static final Random RANDOM = new Random();
 
 	public static boolean isNullOrEmpty(String str) {
 		return str == null || str.equals("");
@@ -30,6 +32,18 @@ public class Utils {
 			result[i] = Integer.valueOf(strs[i]);
 		}
 		return result;
+	}
+
+	public static double nextDouble() {
+		return RANDOM.nextDouble();
+	}
+
+	public static int nextInt(int a, int b) {
+		return RANDOM.nextInt(b - a) + a;
+	}
+
+	public static double nextDouble(double a, double b) {
+		return RANDOM.nextDouble() * (b - a) + a;
 	}
 
 }

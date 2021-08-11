@@ -187,8 +187,8 @@ public class Res {
 	private static Pixmap newHumanEyeImage(int size) {
 		Pixmap pixmap = new Pixmap(size, size, Format.RGBA8888);
 		pixmap.setColor(Color.BLACK);
-		pixmap.fillCircle(size * 3 / 10, size * 3 / 7, size / 12);
-		pixmap.fillCircle(size * 7 / 10, size * 3 / 7, size / 12);
+		DrawUtils.drawEye(pixmap, size * 5 / 16, size * 3 / 8, size * 3 / 16);
+		DrawUtils.drawEye(pixmap, size * 11 / 16, size * 3 / 8, size * 3 / 16);
 		return pixmap;
 	}
 

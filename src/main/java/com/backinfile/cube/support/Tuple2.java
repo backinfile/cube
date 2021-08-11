@@ -9,4 +9,8 @@ public class Tuple2<T1, T2> {
 		this.value2 = value2;
 	}
 
+	@Override
+	public String toString() {
+		return "<"+value1.toString() +"," + value2.toString() +">";
+	}
 }

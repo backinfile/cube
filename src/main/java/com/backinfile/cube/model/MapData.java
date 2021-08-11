@@ -21,6 +21,10 @@ public class MapData {
 		cubeMap = new MMap<Cube>(width, height);
 	}
 
+	public boolean isSameSize(MapData mapData) {
+		return this.width == mapData.width && this.height == mapData.height;
+	}
+
 	public boolean hasHuman() {
 		for (Cube cube : cubeMap.getUnitList()) {
 			if (cube instanceof Player) {

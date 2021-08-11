@@ -54,7 +54,7 @@ public class GameScreen implements Screen {
 	@Override
 	public void pause() {
 		Log.game.info("pause");
-	}
+	}   
 
 	@Override
 	public void resume() {

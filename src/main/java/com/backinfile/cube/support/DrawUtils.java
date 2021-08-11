@@ -19,6 +19,11 @@ public class DrawUtils {
 		}
 	}
 
+	public static void drawEye(Pixmap pixmap, int x, int y, int width) {
+		pixmap.fillRectangle(x - width * 5 / 8, y - width / 12, width * 5 / 4, width / 6);
+		pixmap.fillRectangle(x - width / 2, y + width / 2, width, width);
+	}
+
 	public static void drawArc(Pixmap pixmap, int x, int y, int radius, int from, int end) {
 		double fromRadian = from * Math.PI / 180;
 		double endRadian = end * Math.PI / 180;

@@ -84,13 +84,9 @@ public class GameViewManager {
 			ActionUtils.moveTo(cubeView, targetX, targetY, ANI_DURATION);
 			ActionUtils.sizeTo(cubeView, cubeWidth, cubeHeight, ANI_DURATION);
 
-			// 人物移动动画
-			if (cube instanceof Human) {
-				Human human = (Human) cube;
-				cubeView.setHumanEyeOffset(human.lastMove.x * cubeWidth / 10, human.lastMove.y * cubeHeight / 10,
-						ANI_DURATION);
-			}
 		}
+
+		moveHumanEye(GameManager.instance.human.lastMove, ANI_DURATION);
 
 		// 然后控制相机缩放
 		CubeViewGroup cubeGroup = worldStage.getHumanCubeViewGroup();
@@ -109,6 +105,18 @@ public class GameViewManager {
 			staticSetView();
 			Log.game.debug("done");
 		});
+	}
+
+	public void moveHumanEye(Vector move, float duration) {
+		CubeView humanCubeView = GameManager.instance.worldStage.getHumanCubeView();
+		CubeViewGroup cubeGroup = GameManager.instance.worldStage.getHumanCubeViewGroup();
+
+		float cubeWidth = cubeGroup.getWidth() / cubeGroup.getMapData().width;
+		float cubeHeight = cubeGroup.getHeight() / cubeGroup.getMapData().height;
+
+		if (humanCubeView != null) {
+			humanCubeView.setHumanEyeOffset(move.x * cubeWidth / 10, move.y * cubeHeight / 10, duration);
+		}
 	}
 
 	private void preSetAniDuration(History history) {

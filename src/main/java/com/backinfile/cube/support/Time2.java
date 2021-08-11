@@ -11,4 +11,8 @@ public class Time2 {
 	public static long currentTimeMillis() {
 		return System.currentTimeMillis();
 	}
+
+	public static long getCurMillis() {
+		return currentTimeMillis();
+	}
 }

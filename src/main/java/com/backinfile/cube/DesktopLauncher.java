@@ -20,6 +20,7 @@ public class DesktopLauncher {
 		config.width = Settings.SCREEN_WIDTH;
 		config.height = Settings.SCREEN_HEIGHT;
 		config.resizable = Settings.RESIZABLE;
+		config.title = Settings.TITLE;
 		Log.core.info("creating game {}*{}", config.width, config.height);
 		new LwjglApplication(new MainGame(), config);
 	}
